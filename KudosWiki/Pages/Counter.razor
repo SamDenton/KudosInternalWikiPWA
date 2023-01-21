@@ -1,11 +1,10 @@
 ﻿@page "/counter"
-@using TinyMCE.Blazor
 
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
 <div hidden="@IsEditing">
-    <p>@content</p>
+    <p>@(new MarkupString(content))</p>
 </div>
 <div class="dotted-lines" hidden="@(!IsEditing)">
     <Editor
@@ -19,6 +18,21 @@
       @bind-Value=content
     /> 
 </div>
+<div hidden="@IsEditing">
+    <p>@(new MarkupString(content2))</p>
+</div>
+<div class="dotted-lines" hidden="@(!IsEditing)">
+    <Editor
+      Id="counterTestEditor2"
+      Inline=false
+      CloudChannel="5"
+      Disable=false
+      Conf="@editorConf"
+      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+      ClassName="counterEditor"
+      @bind-Value=content2
+    /> 
+</div>
 <button class="btn btn-primary" @onclick="ClearContent">Clear</button>
 <button class="btn btn-primary" @onclick="Edit" hidden="@IsEditing">Edit</button>
 <button class="btn btn-success" @onclick="Save" hidden="@(!IsEditing)">Save</button>
@@ -26,7 +40,8 @@
 
 
 @code {
-    private string content = "<p>Hello world</p>"; //will be tied to a DB
+    private string content = "<p>Hello world</p>";
+    private string content2 = "<p>Hello world2</p>";//will be tied to a DB
     private string initialContent { get; set; }
     private bool IsEditing { get; set; }
 
@@ -38,6 +53,7 @@
     private void ClearContent()
     {
         content = "";
+        content2 = "";
     }
 
     private void Edit()
@@ -58,7 +74,13 @@
     }
 
     private Dictionary<string, object> editorConf = new Dictionary<string, object>  {
-        {"toolbar", "undo redo | bold italic"},
-        {"width", 400}
+        {"menubar", "edit insert format table tools help"},
+        {"toolbar", "undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl"},
+        {"plugins", "link image imagetools spellchecker table lists advlist code emoticons wordcount"},
+        {"contextmenu", "link image imagetools table spellchecker lists"},
+        {"table_toolbar", "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol"},
+        {"width", 800},
+        {"autosave_ask_before_unload", "true"},
+        {"resize", "both"}
     };
 }
