@@ -4,6 +4,10 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+.kudosText {
+    color: #0d1f5b;
+}
+
 h1:focus {
     outline: none;
 }

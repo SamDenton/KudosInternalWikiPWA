@@ -1,9 +1,32 @@
 ﻿@page "/"
 
+<head>
+    <link href="css/app.css" rel="stylesheet" />
+</head>
+
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container-fluid bg-dark text-light">
+    <div class="row">
+        <div class="col-12 text-center">
+            <img src="@Logo" alt="Company Logo" height="165" width="272" class="mx-auto d-block img-fluid" />
+            <h1 class="mt-3">Welcome to the Internal Wiki</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <p>This is the internal wiki for our company. It contains a wealth of information, resources, and documentation that will help you understand and use our products and services.</p>
+        </div>
+    </div>
+</div>
+<div class="container-fluid bg-dark text-light text-right">
+    <AuthorizeView>
+        <Authorized>
+            <p>Welcome, @context.User.Identity.Name</p>
+        </Authorized>
+    </AuthorizeView>
+</div>
 
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+    private string Logo = "Kudos_logo.png";
+}
