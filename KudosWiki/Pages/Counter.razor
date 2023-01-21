@@ -1,18 +1,64 @@
 ﻿@page "/counter"
+@using TinyMCE.Blazor
 
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
+<div hidden="@IsEditing">
+    <p>@content</p>
+</div>
+<div class="dotted-lines" hidden="@(!IsEditing)">
+    <Editor
+      Id="counterTestEditor"
+      Inline=false
+      CloudChannel="5"
+      Disable=false
+      Conf="@editorConf"
+      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+      ClassName="counterEditor"
+      @bind-Value=content
+    /> 
+</div>
+<button class="btn btn-primary" @onclick="ClearContent">Clear</button>
+<button class="btn btn-primary" @onclick="Edit" hidden="@IsEditing">Edit</button>
+<button class="btn btn-success" @onclick="Save" hidden="@(!IsEditing)">Save</button>
+<button class="btn btn-danger" @onclick="Cancel" hidden="@(!IsEditing)">Cancel</button>
 
-<p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 @code {
-    private int currentCount = 0;
+    private string content = "<p>Hello world</p>"; //will be tied to a DB
+    private string initialContent { get; set; }
+    private bool IsEditing { get; set; }
 
-    private void IncrementCount()
+    protected override void OnInitialized()
     {
-        currentCount++;
+        base.OnInitialized();
     }
+
+    private void ClearContent()
+    {
+        content = "";
+    }
+
+    private void Edit()
+    {
+        initialContent = content;
+        IsEditing = true;
+    }
+
+    private void Save()
+    {
+        IsEditing = false;
+    }
+
+    private void Cancel()
+    {
+        content = initialContent;
+        IsEditing = false;
+    }
+
+    private Dictionary<string, object> editorConf = new Dictionary<string, object>  {
+        {"toolbar", "undo redo | bold italic"},
+        {"width", 400}
+    };
 }
