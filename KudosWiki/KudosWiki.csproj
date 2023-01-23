@@ -15,8 +15,7 @@
     <PackageReference Include="TinyMCE.Blazor" Version="1.0.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
-  </ItemGroup>
-
+<ItemGroup>
+	<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+</ItemGroup>
 </Project>

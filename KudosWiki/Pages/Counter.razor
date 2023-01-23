@@ -1,8 +1,8 @@
 ﻿@page "/counter"
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Barcode Scanners</PageTitle>
 
-<h1>Counter</h1>
+<h1>Hardware: <small class="text-muted">Barcode Scanners</small></h1>
 <div hidden="@IsEditing">
     <p>@(new MarkupString(content))</p>
 </div>
@@ -33,10 +33,10 @@
       @bind-Value=content2
     /> 
 </div>
-<button class="btn btn-primary" @onclick="ClearContent">Clear</button>
-<button class="btn btn-primary" @onclick="Edit" hidden="@IsEditing">Edit</button>
-<button class="btn btn-success" @onclick="Save" hidden="@(!IsEditing)">Save</button>
-<button class="btn btn-danger" @onclick="Cancel" hidden="@(!IsEditing)">Cancel</button>
+<button class="btn btn-outline-primary" @onclick="ClearContent">Clear</button>
+<button class="btn btn-outline-primary" @onclick="Edit" hidden="@IsEditing">Edit</button>
+<button class="btn btn-outline-primary" @onclick="Save" hidden="@(!IsEditing)">Save</button>
+<button class="btn btn-outline-primary" @onclick="Cancel" hidden="@(!IsEditing)">Cancel</button>
 
 
 @code {
@@ -76,10 +76,12 @@
     private Dictionary<string, object> editorConf = new Dictionary<string, object>  {
         {"menubar", "edit insert format table tools help"},
         {"toolbar", "undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl"},
-        {"plugins", "link image imagetools spellchecker table lists advlist code emoticons wordcount"},
+        {"plugins", "link image imagetools spellchecker table lists advlist code emoticons wordcount importcss "},
         {"contextmenu", "link image imagetools table spellchecker lists"},
         {"table_toolbar", "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol"},
-        {"width", 800},
+        {"width", 900},
+        {"skin", "oxide-dark"},
+        {"content_css", "dark"},
         {"autosave_ask_before_unload", "true"},
         {"resize", "both"}
     };
