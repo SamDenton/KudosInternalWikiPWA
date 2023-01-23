@@ -2,8 +2,8 @@
 // In development, always fetch from the network and do not enable offline support.
 // This is because caching would make development more difficult (changes would not
 // be reflected on the first load after each change).
-//self.addEventListener('fetch', () => { });
-
+self.addEventListener('fetch', () => { });
+/*
 const CACHE_NAME = 'v9';
 const urlsToCache = [
     '/',
@@ -44,7 +44,6 @@ const urlsToCache = [
     'https://cdn.tiny.cloud/1/7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl/tinymce/5.10.7-133/plugins/importcss/plugin.min.js',
     'https://cdn.tiny.cloud/1/7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl/tinymce/5.10.7-133/skins/ui/oxide-dark/content.min.css',
     'https://cdn.tiny.cloud/1/7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl/tinymce/5.10.7-133/skins/content/dark/content.min.css',
-    'https://cdn.tiny.cloud/1/7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl/tinymce/5.10.7-133/skins/ui/oxide-dark/content.min.css',
     'https://cdn.tiny.cloud/1/7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl/tinymce/5.10.7-133/skins/content/dark/content.min.css',
     'https://cdn.tiny.cloud/1/7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl/tinymce/5.10.7-133/plugins/emoticons/js/emojis.min.js',
 ];
@@ -89,4 +88,4 @@ self.addEventListener('activate', (event) => {
     );
     self.clients.claim();
 });
-
+*/
