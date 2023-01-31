@@ -1,0 +1,17 @@
+[
+  {
+    "page": "Hardware",
+    "section": "Barcode",
+    "content": "Here is some <u> content </u> about barcode scanners!"
+  },
+  {
+    "page": "Hardware",
+    "section": "PED",
+    "content": "PED information here"
+  },
+  {
+    "page": "Hardware",
+    "section": "Printers",
+    "content": "printers print stuff"
+  }
+]

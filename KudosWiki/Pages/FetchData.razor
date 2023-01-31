@@ -13,23 +13,22 @@
 }
 else
 {
-    <table class="table">
+    <table class="table table-success table-striped">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Page</th>
+                <th>Section</th>
+                <th>Content</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var forecast in forecasts)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@forecast.page</td>
+                    <td>@forecast.section</td>
+                    <td>@forecast.content</td>
+
                 </tr>
             }
         </tbody>
@@ -41,17 +40,15 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/wikiData.json");
     }
 
     public class WeatherForecast
     {
-        public DateTime Date { get; set; }
+        public string? page { get; set; }
 
-        public int TemperatureC { get; set; }
+        public string? section { get; set; }
 
-        public string? Summary { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        public string? content { get; set; }
     }
 }
