@@ -3,7 +3,6 @@
 @using System.Net.Http;
 @using System.Net.Http.Headers;
 @using Newtonsoft.Json;
-<!--@using Microsoft.Security.Application;-->
 @inject HttpClient Http;
 
 <PageTitle>Barcode Scanners</PageTitle>
@@ -39,7 +38,7 @@
                                 CloudChannel="5"
                                 Disable=false
                                 Conf="@editorConf"
-                                ApiKey=""
+                                ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
                                 ClassName="counterEditor"
                                 @bind-Value=(contentHolder.content)
                             /> 
@@ -72,12 +71,14 @@
     private bool[] IsEditing;
     private string repoName = "WikiData";
     private string userName = "SamDenton";
-    private string token = "";
+    private string token;
     private string commitText = "Test From Wiki";
     private string newSHA;
 
     protected override async Task OnInitializedAsync()
     {
+        var getFromTokens = await Http.GetAsync("tokens.txt");
+        token = await getFromTokens.Content.ReadAsStringAsync();
         contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
         initialContent = new string[contentHolderList.Length];
         IsEditing = new bool[contentHolderList.Length];
@@ -253,7 +254,7 @@
     private Dictionary<string, object> editorConf = new Dictionary<string, object>  {
         {"menubar", "edit insert format table tools help"},
         {"toolbar", "undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl"},
-        {"plugins", "link image imagetools spellchecker table lists advlist code emoticons wordcount importcss autoresize"},
+        {"plugins", "link image table lists advlist code emoticons wordcount importcss autoresize"}, //imagetools spellchecker - Removed as imagetools now premium and spellchecker depricated
         {"contextmenu", "link image imagetools table spellchecker lists"},
         {"table_toolbar", "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol"},
         {"width", "100%"},
