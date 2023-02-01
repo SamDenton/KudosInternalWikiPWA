@@ -6,7 +6,8 @@
 @inject HttpClient Http;
 
 <PageTitle>Barcode Scanners</PageTitle>
-
+<!--Still not sure if I want 2-3 pages total with sections, or a page for each section-->
+<!--Either way, I think i will need a different JSON file for each page-->
 <h1>Hardware: <small class="text-muted">Barcode Scanners</small></h1>
 <div>
     @if (contentHolderList == null)
@@ -19,7 +20,7 @@
         <table class="table table-dark table-striped">
             <thead>
                 <tr>
-                    <th class="col-1 p-3 mb-2">Section</th>
+                    <th class="col-1">Section</th>
                     <th>Content</th>
                 </tr>
             </thead>
@@ -27,7 +28,7 @@
                 @foreach (var contentHolder in contentHolderList)
                 {
                     <tr>
-                        <td><p>@contentHolder.page: <small>@contentHolder.section</small></p></td>
+                        <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
 
                         <td hidden="@IsEditing[count]">@(new MarkupString(@contentHolder.content))</td>
 
@@ -60,6 +61,19 @@
             </tbody>
         </table>
     }
+    <div class="form-group">
+        <label for="sectionDropdown">Select New Section Type:</label>
+        <select class="form-control" id="sectionDropdown" @bind="sectionDropdown">
+            <option value="Hardware">Hardware</option>
+            <option value="Software">Software</option>
+            <option value="Misc">Misc</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="sectionContent">Section Name:</label>
+        <input type="text" class="form-control" id="sectionContent" placeholder="Name of the new section" @bind="sectionName">
+    </div>
     <button class="btn btn-outline-primary" @onclick="(() => AddNewSection())">Add New Section</button>
 </div>
 
@@ -67,17 +81,19 @@
     private contentHolder[]? contentHolderList;
 
     private string[] initialContent;
-    //private string content { get; set; }
     private bool[] IsEditing;
     private string repoName = "WikiData";
     private string userName = "SamDenton";
+    private string sectionDropdown;
+    private string sectionName;
     private string token;
     private string commitText = "Test From Wiki";
     private string newSHA; 
 
+
     protected override async Task OnInitializedAsync()
     {
-        var getFromTokens = await Http.GetAsync("tokens.txt");
+        var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
         contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
         initialContent = new string[contentHolderList.Length];
@@ -124,16 +140,17 @@
     private void AddNewSection()
     {
         //code to add a new section to my JSON string
+
+        var type = sectionDropdown;
+        var name = sectionName;
+
         Array.Resize(ref contentHolderList, contentHolderList.Length + 1);
         contentHolderList[contentHolderList.Length - 1] = new contentHolder { 
-            page = "Software", 
-            section = "COM Ports", 
-            content = "<p>COM ports are used for ommunicating with driverless devices with a raw datastreem</p>" 
+            page = type, 
+            section = name, 
+            content = "<p>Enter some details about " + name + " here.</p>" 
         };
-        /*
-        var jsonString = JsonConvert.SerializeObject(contentHolderList);
-        //PUT to github
-        UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA); */
+
         ReInitialize();
         IsEditing[contentHolderList.Length - 1] = true;
     }
