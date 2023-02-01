@@ -17,52 +17,51 @@
     else
     {
         var count = 0;
-        <table class="table table-success table-striped">
+        <table class="table table-dark table-striped">
             <thead>
                 <tr>
-                    <th>Page</th>
-                    <th>Section</th>
+                    <th class="col-1 p-3 mb-2">Section</th>
                     <th>Content</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var contentHolder in contentHolderList)
                 {
-                    Console.WriteLine("count before table " + count);
-                    <tr hidden="@IsEditing[count]">
-                        <td>@contentHolder.page</td>
-                        <td>@contentHolder.section</td>
-                        <td>@(new MarkupString(@contentHolder.content))</td>
-                    </tr>
-                    Console.WriteLine("count in middle of table " + count);
                     <tr>
-                        <div class="dotted-lines" hidden="@(!IsEditing[count])">
+                        <td><p>@contentHolder.page: <small>@contentHolder.section</small></p></td>
+
+                        <td hidden="@IsEditing[count]">@(new MarkupString(@contentHolder.content))</td>
+
+                        <td hidden="@(!IsEditing[count])"><div class="dotted-lines">
                             <Editor
                                 Id="@count.ToString()"
                                 Inline=false
                                 CloudChannel="5"
                                 Disable=false
                                 Conf="@editorConf"
-                                ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                ApiKey=""
                                 ClassName="counterEditor"
                                 @bind-Value=(contentHolder.content)
                             /> 
-                        </div>
+                        </div></td>
                     </tr>
-                    Console.WriteLine("count before buttons " + count);
                     int localCount = count;
                     <tr>
+                        <td>
+
+                        </td>
                         <td><button class="btn btn-outline-primary" @onclick="(() => ClearContent(localCount))">Clear</button>
+                        <button class="btn btn-outline-primary" @onclick="(() => RemoveSection(localCount))">Delete</button>
                         <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount))" hidden="@IsEditing[count]">Edit</button>
                         <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[count])">Save</button>
                         <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount))" hidden="@(!IsEditing[count])">Cancel</button></td>
                     </tr>
-                    Console.WriteLine("count after buttons " + count);
                     count++;
                 }
             </tbody>
         </table>
     }
+    <button class="btn btn-outline-primary" @onclick="(() => AddNewSection())">Add New Section</button>
 </div>
 
 @code {
@@ -73,7 +72,7 @@
     private bool[] IsEditing;
     private string repoName = "WikiData";
     private string userName = "SamDenton";
-    private string token = "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";
+    private string token = "";
     private string commitText = "Test From Wiki";
     private string newSHA;
 
@@ -82,11 +81,6 @@
         contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
         initialContent = new string[contentHolderList.Length];
         IsEditing = new bool[contentHolderList.Length];
-        Console.WriteLine("Content length: " + contentHolderList.Length);
-        for (int i = 0;i < contentHolderList.Length; i++) {
-            IsEditing[0] = false;
-        }
-        Console.WriteLine("edditing length: " + IsEditing.Length);
         base.OnInitialized();
     }
 
@@ -115,8 +109,58 @@
 
     private void Cancel(int sectionNo)
     {
-        contentHolderList[sectionNo].content = initialContent[sectionNo];
+        if (initialContent[sectionNo] != null)
+        {
+            contentHolderList[sectionNo].content = initialContent[sectionNo];
+        }
+        else
+        {
+            RemoveSection(contentHolderList.Length - 1);
+        }
         IsEditing[sectionNo] = false;
+    }
+
+    private void AddNewSection()
+    {
+        //code to add a new section to my JSON string
+        Array.Resize(ref contentHolderList, contentHolderList.Length + 1);
+        contentHolderList[contentHolderList.Length - 1] = new contentHolder { 
+            page = "Software", 
+            section = "COM Ports", 
+            content = "<p>COM ports are used for ommunicating with driverless devices with a raw datastreem</p>" 
+        };
+        /*
+        var jsonString = JsonConvert.SerializeObject(contentHolderList);
+        //PUT to github
+        UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA); */
+        ReInitialize();
+        IsEditing[contentHolderList.Length - 1] = true;
+    }
+
+    private async Task RemoveSection(int sectionNo)
+    {
+        contentHolder[] newArray = new contentHolder[contentHolderList.Length - 1];
+        int newArrayIndex = 0;
+        for (int i = 0; i < contentHolderList.Length; i++)
+        {
+            if (i != sectionNo)
+            {
+                newArray[newArrayIndex++] = contentHolderList[i];
+            }
+        }
+        contentHolderList = newArray;
+        ReInitialize();
+
+        var jsonString = JsonConvert.SerializeObject(contentHolderList);
+        //PUT to github
+        await UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA);
+    }
+    //This method should reset lengths of different variabes and re-load the page
+    private void ReInitialize()
+    {
+        initialContent = new string[contentHolderList.Length];
+        IsEditing = new bool[contentHolderList.Length];
+        StateHasChanged();
     }
 
     private async Task UpdateJSONOnGitHub(string jsonString, string repositoryName, string username, string token, string commitMessage, string sha)
@@ -140,7 +184,6 @@
             var responceHeaders = await response.Content.ReadAsStringAsync();
             var gitContent = JsonConvert.DeserializeObject<Root>(responceHeaders);
             newSHA = gitContent.content.sha;
-            Console.WriteLine("new sha value: " + newSHA);
             response.EnsureSuccessStatusCode();
         }
     }
@@ -210,11 +253,14 @@
     private Dictionary<string, object> editorConf = new Dictionary<string, object>  {
         {"menubar", "edit insert format table tools help"},
         {"toolbar", "undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl"},
-        {"plugins", "link image imagetools spellchecker table lists advlist code emoticons wordcount importcss "},
+        {"plugins", "link image imagetools spellchecker table lists advlist code emoticons wordcount importcss autoresize"},
         {"contextmenu", "link image imagetools table spellchecker lists"},
         {"table_toolbar", "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol"},
-        {"width", 900},
-        {"height", 200},
+        {"width", "100%"},
+        {"min_width", "100%"},
+        {"height", "100%"},
+        {"min_height", 100},
+        {"autoresize_bottom_margin", 50},
         {"skin", "oxide-dark"},
         {"content_css", "dark"},
         {"autosave_ask_before_unload", "true"},
