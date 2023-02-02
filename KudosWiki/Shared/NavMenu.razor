@@ -2,10 +2,10 @@
     <div class="container-fluid">
         <h4 class=".kudosText">
             Kudos <small class="text-muted">Internal Wiki</small>
+            <button title="Navigation menu" class="navbar-toggler btn-light" @onclick="ToggleNavMenu">
+                <span class="navbar-toggler-icon">\/</span>
+            </button>
         </h4>
-        <button title="Navigation menu" class="navbar-toggler text-light" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
     </div>
 </div>
 
@@ -32,7 +32,7 @@
 @code {
     private bool collapseNavMenu = true;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private string? NavMenuCssClass => !collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {

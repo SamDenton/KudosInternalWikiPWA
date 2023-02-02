@@ -4,128 +4,170 @@
 @using System.Net.Http.Headers;
 @using Newtonsoft.Json;
 @inject HttpClient Http;
+@inject NavigationManager Navigation;
+@*Using Authorize View to only load content when user is authenticated.  If not logged in, they should be redirected to a Microsoft authenticator*@
+<AuthorizeView>
+    <Authorized>
+        <PageTitle>Barcode Scanners</PageTitle>
+        @*Still not sure if I want 2-3 pages total with sections, or a page for each section*@
+        @*Either way, I think i will need a different JSON file for each page*@
+        <h1>Hardware: <small class="text-muted">Barcode Scanners</small></h1>
+        <div>
+            @*Show a loading message before API call is complete*@
+            @*Might add a timer so it displays a different message if the request takes too long*@
+            @*should also add failure case if the API call returns 404*@
+            @if (contentHolderList == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                var count = 0;
+                <table class="table table-dark table-striped">
+                    <thead>
+                        <tr>
+                            <th class="col-1">Section</th>
+                            <th>Content</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @*Pragmatically populate the table using my customer object array*@
+                        @foreach (var contentHolder in contentHolderList)
+                        {
+                            <tr>
+                                @*Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden*@
+                                <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
+                                @*Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM...*@
+                                <td hidden="@IsEditing[count]">@(new MarkupString(@contentHolder.content))</td>
+                                @*when IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE*@
+                                <td hidden="@(!IsEditing[count])"><div class="dotted-lines">
+                                    <Editor
+                                        Id="@count.ToString()"
+                                        Inline=false
+                                        CloudChannel="5"
+                                        Disable=false
+                                        Conf="@editorConf"
+                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                        ClassName="counterEditor"
+                                        @bind-Value=(contentHolder.content)
+                                    /> 
+                                </div></td>
+                            </tr>
+                            @*initiate localCount here to button onclick events use the count at create time, not when clicked*@
+                            int localCount = count;
+                            <tr>
+                                <td>
+                                    @*Spacing*@
+                                </td>
+                                @*Button bank to be generated per section.  Using lambda expression to parse value to function*@
+                                <td><button class="btn btn-outline-primary" @onclick="(() => ClearContent(localCount))">Clear</button>
+                                <button class="btn btn-outline-primary" @onclick="(() => RemoveSection(localCount))">Delete</button>
+                                <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount))" hidden="@IsEditing[count]">Edit</button>
+                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[count])">Save</button>
+                                <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount))" hidden="@(!IsEditing[count])">Cancel</button></td>
+                            </tr>
+                            @*Increment global count*@
+                            count++;
+                        }
+                    </tbody>
+                </table>
+                @*Section for adding a new section from user selection*@
+                @*Using bootstraps grid layout for formatting*@
+                <div class="bg-dark text-primary container-fluid">
+                    <div class="row">
+                        <div class="col-6">
+                            @*Dropdown for section type*@
+                            <div class="form-group">
+                                <label class="form-label bg-dark text-light" for="sectionDropdown">Select New Section Type:</label>
+                                <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @bind="sectionDropdown">
+                                    <option value="Hardware">Hardware</option>
+                                    <option value="Software">Software</option>
+                                    <option value="Misc">Misc</option>
+                                </select>
+                            </div>
+                            @*Text field for section name*@
+                            <div class="form-group bg-dark text-primary">
+                                <label class="form-label bg-dark text-light mt-1" for="sectionContent">Section Name:</label>
+                                <input type="text" class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionContent" placeholder="Name of the new section" @bind="sectionName">
+                            </div>
+                            @*Add section button*@
+                            <button class="btn btn-outline-primary mt-2" @onclick="(() => AddNewSection())">Add New Section</button>
+                        </div>
+                        <div class="col-6">
+                            @*Spacing*@
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
 
-<PageTitle>Barcode Scanners</PageTitle>
-<!--Still not sure if I want 2-3 pages total with sections, or a page for each section-->
-<!--Either way, I think i will need a different JSON file for each page-->
-<h1>Hardware: <small class="text-muted">Barcode Scanners</small></h1>
-<div>
-    @if (contentHolderList == null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else
-    {
-        var count = 0;
-        <table class="table table-dark table-striped">
-            <thead>
-                <tr>
-                    <th class="col-1">Section</th>
-                    <th>Content</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var contentHolder in contentHolderList)
-                {
-                    <tr>
-                        <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
-
-                        <td hidden="@IsEditing[count]">@(new MarkupString(@contentHolder.content))</td>
-
-                        <td hidden="@(!IsEditing[count])"><div class="dotted-lines">
-                            <Editor
-                                Id="@count.ToString()"
-                                Inline=false
-                                CloudChannel="5"
-                                Disable=false
-                                Conf="@editorConf"
-                                ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
-                                ClassName="counterEditor"
-                                @bind-Value=(contentHolder.content)
-                            /> 
-                        </div></td>
-                    </tr>
-                    int localCount = count;
-                    <tr>
-                        <td>
-
-                        </td>
-                        <td><button class="btn btn-outline-primary" @onclick="(() => ClearContent(localCount))">Clear</button>
-                        <button class="btn btn-outline-primary" @onclick="(() => RemoveSection(localCount))">Delete</button>
-                        <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount))" hidden="@IsEditing[count]">Edit</button>
-                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[count])">Save</button>
-                        <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount))" hidden="@(!IsEditing[count])">Cancel</button></td>
-                    </tr>
-                    count++;
-                }
-            </tbody>
-        </table>
-    }
-    <div class="form-group">
-        <label for="sectionDropdown">Select New Section Type:</label>
-        <select class="form-control" id="sectionDropdown" @bind="sectionDropdown">
-            <option value="Hardware">Hardware</option>
-            <option value="Software">Software</option>
-            <option value="Misc">Misc</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label for="sectionContent">Section Name:</label>
-        <input type="text" class="form-control" id="sectionContent" placeholder="Name of the new section" @bind="sectionName">
-    </div>
-    <button class="btn btn-outline-primary" @onclick="(() => AddNewSection())">Add New Section</button>
-</div>
+    </Authorized>
+    <NotAuthorized>
+        @*If user is not authorized, call RedirectHome*@
+        <p>Please Login to see this Content.  Redirecting...</p>
+        @if(!context.User.Identity.IsAuthenticated)
+        {
+            RedirectHome();
+        }
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
+    @*Declare custom object array*@
     private contentHolder[]? contentHolderList;
-
+    @*Declare Global Vars*@
     private string[] initialContent;
     private bool[] IsEditing;
-    private string repoName = "WikiData";
-    private string userName = "SamDenton";
     private string sectionDropdown;
     private string sectionName;
+    @*Declare/Initialize variables for API communication*@
+    private string repoName = "WikiData";
+    private string userName = "SamDenton";
     private string token;
     private string commitText = "Test From Wiki";
     private string newSHA; 
-
-
+    @*Initialize page.  Using Async initialization as I want to load content from API before rendering*@
     protected override async Task OnInitializedAsync()
     {
+        @*Get API token from external file.  Token.txt is not included in Commits.  Should probably do the same with my TinyMCE token*@
         var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
+        @*Call method to make GET request*@
         contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
+        @*Initialize control variables after populating contentHolderList*@
         initialContent = new string[contentHolderList.Length];
         IsEditing = new bool[contentHolderList.Length];
         base.OnInitialized();
     }
-
+    @*Currently actually redirects to Microsoft Authentication popup, but might change this to home*@
+    protected private void RedirectHome()
+    {
+        Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
+    }
+    @*Method to clear specific sections content*@
     private void ClearContent(int sectionNo)
     {
         contentHolderList[sectionNo].content = "";
     }
-
+    @*Set selected sections IsEditing to True, which should render the editor*@
     private void Edit(int sectionNo)
     {
-        Console.WriteLine(sectionNo);
+        @*When you click edit, save the current state so 'Cancel' button can revert changes*@
         initialContent[sectionNo] = contentHolderList[sectionNo].content;
         IsEditing[sectionNo] = true;
     }
-
+    @*Set selected section's IsEditing to false, then call method to PUT new JSON to GitHub.  Should render updated content to DOM*@
     private async void Save(int sectionNo)
     {
         IsEditing[sectionNo] = false;
-        //await DeleteFile(repoName, userName, token, commitText, newSHA);
-        // Serialize the contentObjectList to a JSON string
+        @*Serialize current object array to a JSON String*@
         var jsonString = JsonConvert.SerializeObject(contentHolderList);
-        //PUT to github
         await UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA);
     }
-    //github token: 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
-
+    @*Set sections IsEditing to false, and set the content to the stored previous state*@
     private void Cancel(int sectionNo)
     {
+        @*If statement needed here so canceling on a newly added section will remove it*@
         if (initialContent[sectionNo] != null)
         {
             contentHolderList[sectionNo].content = initialContent[sectionNo];
@@ -136,14 +178,13 @@
         }
         IsEditing[sectionNo] = false;
     }
-
+    @*Add a new object to my array from user input*@
     private void AddNewSection()
     {
-        //code to add a new section to my JSON string
-
+        @*Using data binding to tie user selecton to these vars*@
         var type = sectionDropdown;
         var name = sectionName;
-
+        @*Best way to add to an array is to resize then initialize the new index*@
         Array.Resize(ref contentHolderList, contentHolderList.Length + 1);
         contentHolderList[contentHolderList.Length - 1] = new contentHolder { 
             page = type, 
@@ -152,11 +193,13 @@
         };
 
         ReInitialize();
+        @*initialize new index on control variables*@
         IsEditing[contentHolderList.Length - 1] = true;
     }
-
+    @*Method to remove selected section*@
     private async Task RemoveSection(int sectionNo)
     {
+        @*Easiest way to remove an element from middle of array is to build a new array from the old, skipping the line to remove, then setting it back to main array*@
         contentHolder[] newArray = new contentHolder[contentHolderList.Length - 1];
         int newArrayIndex = 0;
         for (int i = 0; i < contentHolderList.Length; i++)
@@ -168,12 +211,11 @@
         }
         contentHolderList = newArray;
         ReInitialize();
-
+        @*Serialize and upload to GitHub*@
         var jsonString = JsonConvert.SerializeObject(contentHolderList);
-        //PUT to github
         await UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA);
     }
-    //This method should reset lengths of different variabes and re-load the page
+    @*This method should reset lengths of different variables and re-load the page*@
     private void ReInitialize()
     {
         initialContent = new string[contentHolderList.Length];
@@ -237,7 +279,6 @@
             throw new Exception("Error deleting file: " + response.ReasonPhrase);
         }
     }
-
 
     public class contentHolder
     {

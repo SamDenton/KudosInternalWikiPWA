@@ -24,9 +24,68 @@
         <Authorized>
             <p>Welcome, @context.User.Identity.Name</p>
         </Authorized>
+        <NotAuthorized>
+            <p>Not yet logged in</p>
+        </NotAuthorized>
     </AuthorizeView>
 </div>
 
 @code {
     private string Logo = "Kudos_logo.png";
+}
+
+
+<nav class="flex-column text-light">
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" @onclick="()=>expandSubNav = !expandSubNav">
+            <span class="oi oi-list-rich" aria-hidden="true"></span> Testing out collabsable menus
+        </NavLink>
+    </div>
+
+    @if (expandSubNav)
+    {
+        <div class="nav-item px-3">
+            <NavLink class="expand-menu" @onclick="()=>expandSubNav1 = !expandSubNav1" href="">
+                <span class="oi oi-plus">Option 1</span>
+            </NavLink>
+        </div>
+        @if(expandSubNav1)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="expand-menu" href="">
+                    <span class="oi oi-list-rich">Option 1, 1</span>
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="expand-menu" href="">
+                    <span class="oi oi-list-rich">Option 1, 2</span>
+                </NavLink>
+            </div>
+        }
+        <div class="nav-item px-3">
+            <NavLink class="" @onclick="()=>expandSubNav2 = !expandSubNav2" href="">
+                <span class="oi oi-plus">option 2</span>
+            </NavLink>
+        </div>
+        @if(expandSubNav2)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="expand-menu" href="">
+                    <span class="oi oi-list-rich">Option 2, 1</span>
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="expand-menu" href="">
+                    <span class="oi oi-list-rich">Option 2, 2</span>
+                </NavLink>
+            </div>
+        }
+    }
+</nav>
+@code {
+
+    private bool expandSubNav;
+    private bool expandSubNav1;
+    private bool expandSubNav2;
+
 }
