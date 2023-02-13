@@ -5,6 +5,8 @@
 @using Newtonsoft.Json;
 @inject HttpClient Http;
 @inject NavigationManager Navigation;
+@inject MyStateContainer myStateContainer
+@implements IDisposable
 @* Using Authorize View to only load content when user is authenticated.  If not logged in, they should be redirected to a Microsoft authenticator *@
 <AuthorizeView>
     <Authorized>
@@ -24,6 +26,7 @@
             else
             {
                 var count = 0;
+                var countAll = 0;
                 var clearText = "";
                 <table class="table table-dark table-striped">
                     <thead>
@@ -59,16 +62,17 @@
                                 </tr>
                                 @* Initiate localCount here to button onclick events use the count at create time, not when clicked *@
                                 var localCount = count;
+                                var localCountAll = countAll;
                                 <tr>
                                     <td>
                                         @* Spacing *@
                                     </td>
                                     @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
-                                    <td><button class="btn btn-outline-warning" @onclick="(() => {contentHolder.content = clearText;})">Clear</button>
-                                    <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCount))">Delete</button>
-                                    <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount))" hidden="@IsEditing[localCount]">Edit</button>
+                                    <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
+                                    <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                    <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
                                     <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
-                                    <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
+                                    <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                 </tr>
                                 @* Increment global count *@
                                 count++;
@@ -100,25 +104,28 @@
                                 </tr>
                                 @* Initiate localCount here so button onclick events use the count at create time, not when clicked *@
                                 var localCount = count;
+                                var localCountAll = countAll;
                                 <tr>
                                     <td>
                                         @* Spacing *@
                                     </td>
                                     @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
-                                    <td><button class="btn btn-outline-warning" @onclick="(() => {contentHolder.content = clearText;})">Clear</button>
-                                    <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCount))">Delete</button>
-                                    <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount))" hidden="@IsEditing[localCount]">Edit</button>
+                                    <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
+                                    <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                    <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
                                     <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
-                                    <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
+                                    <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                 </tr>
                                 @* Increment global count *@
                                 count++;
                             }
+                            countAll++;
                         }
                         @if (type == "add" && IsEditing[0] == true)
                         {
                             var localCount = 0;
                             count = 0;
+                            var localCountAll = countAll;
                             <tr>
                                 <td>New Section: </td>
                                 @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
@@ -136,18 +143,19 @@
                                     /> 
                                 </div></td>
                             </tr>
-                        @* Initiate localCount here to button onclick events use the count at create time, not when clicked *@
-                        <tr>
-                            <td>
-                                @* Spacing *@
-                            </td>
-                            @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
-                            <td><button class="btn btn-outline-warning" @onclick="(() => {contentHolderList.Last().content = clearText;})">Clear</button>
-                            <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCount))">Delete</button>
-                            <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount))" hidden="@IsEditing[localCount]">Edit</button>
-                            <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
-                            <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
-                        </tr>
+                            @* Initiate localCount here to button onclick events use the count at create time, not when clicked *@
+                            <tr>
+                                <td>
+                                    @* Spacing *@
+                                </td>
+                                @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
+                                <td><!--<button class="btn btn-outline-warning" @onclick="(() => {contentHolderList.Last().content = "";}))">Clear</button>-->
+                                <!--<button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>-->
+                                <!--<button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>-->
+                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
+                                <button class="btn btn-outline-primary" @onclick="(() => CancelNew(localCount))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
+                            </tr>
+                            countAll++;
                         }
                     </tbody>
                 </table>
@@ -200,7 +208,9 @@
 @code {
     @* Declare custom object array *@
     public contentHolder[]? contentHolderList;
-    public contentHolder[] ContentHolderListState;
+    
+    
+    //public contentHolder[] ContentHolderListState;
     @* Declare var for current user selection *@
     [Parameter]
     public string? type { get; set; }
@@ -225,10 +235,11 @@
         token = await getFromTokens.Content.ReadAsStringAsync();
     @* Call method to make GET request *@
         contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
+        myStateContainer.OnStateChange += StateHasChanged;
+        //myStateContainer.SetValue();
     @* Initialize control variables after populating contentHolderList *@
         initialContent = new string[contentHolderList.Length];
         IsEditing = new bool[contentHolderList.Length];
-        ContentHolderListState = contentHolderList;
         base.OnInitialized();
     }
     @* Currently actually redirects to Microsoft Authentication popup, but might change this to home *@
@@ -237,42 +248,55 @@
         Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
     }
     @* Method to clear specific sections content *@
-    private void ClearContent(int sectionNo)
+    private void ClearContent(int localSectionNo, int globalSectionNo)
     {
-        contentHolderList[sectionNo].content = "";
+        Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
+        contentHolderList[globalSectionNo].content = "";
+        IsEditing[localSectionNo] = true;
     }
     @* Set selected sections IsEditing to True, which should render the editor *@
-    private void Edit(int sectionNo)
+    private void Edit(int localSectionNo, int globalSectionNo)
     {
-        Console.WriteLine(sectionNo);
+        Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
     @* When you click edit, save the current state so 'Cancel' button can revert changes *@
-        initialContent[sectionNo] = contentHolderList[sectionNo].content;
-        IsEditing[sectionNo] = true;
+        initialContent[globalSectionNo] = contentHolderList[globalSectionNo].content;
+        IsEditing[localSectionNo] = true;
     }
     @* Set selected section's IsEditing to false, then call method to PUT new JSON to GitHub.  Should render updated content to DOM *@
     private async void Save(int sectionNo)
     {
         IsEditing[sectionNo] = false;
     @* Update the array for navigation *@
-        ContentHolderListState = contentHolderList;
-        StateHasChanged();
+        myStateContainer.SetValue();
+        myStateContainer.OnStateChange += RefreshMe;
+        //Navigation.NavigateTo($"/mainContent/add");
+        //StateHasChanged();
     @* Serialize current object array to a JSON String *@
         var jsonString = JsonConvert.SerializeObject(contentHolderList);
         await UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA);
     }
-    @* Set sections IsEditing to false, and set the content to the stored previous state *@
-    private async void Cancel(int sectionNo)
+    private void RefreshMe()
     {
-    @* If statement needed here so canceling on a newly added section will remove it *@
-        if (initialContent[sectionNo] != null)
+        StateHasChanged();
+    }
+    @* Set sections IsEditing to false, and set the content to the stored previous state *@
+    private async void Cancel(int localSectionNo, int globalSectionNo)
+    {
+        Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
+        @* If statement needed here so canceling on a newly added section will remove it *@
+        if (initialContent[globalSectionNo] != null)
         {
-            contentHolderList[sectionNo].content = initialContent[sectionNo];
+            contentHolderList[globalSectionNo].content = initialContent[globalSectionNo];
         }
         else
         {
             await RemoveSection(contentHolderList.Length - 1);
         }
-        IsEditing[sectionNo] = false;
+        IsEditing[localSectionNo] = false;
+    }
+    private void CancelNew(int localSectionNo)
+    {
+        IsEditing[localSectionNo] = false;
     }
     @* Add a new object to my array from user input *@
     private void AddNewSection()
@@ -293,7 +317,6 @@
             ReInitialize();
     @* Initialize new index on control variables *@
             IsEditing[0] = true;
-            Console.WriteLine(contentHolderList.Length - 1);
         }
         else
         {
@@ -303,6 +326,7 @@
     @* Method to remove selected section *@
     private async Task RemoveSection(int sectionNo)
     {
+        Console.WriteLine("Global: " + sectionNo);
     @* Easiest way to remove an element from middle of array is to build a new array from the old, skipping the line to remove, then setting it back to main array *@
         contentHolder[] newArray = new contentHolder[contentHolderList.Length - 1];
         int newArrayIndex = 0;
@@ -390,7 +414,12 @@
             throw new Exception("Error deleting file: " + response.ReasonPhrase);
         }
     }
+    public void Dispose()
+    {
+        //myStateContainer.OnStateChange -= StateHasChanged;
+    }
     @* Class for creating custom objects from JSON string *@
+    
     public class contentHolder
     {
         public string? page { get; set; }
@@ -399,11 +428,13 @@
 
         public string? content { get; set; }
     }
-
+    
+    @*
     public class ContentHolderState
     {
-        public contentHolder[] ContentHolderListState { get; set; }
+        public contentHolder[] contentHolderList { get; set; }
     }
+    *@
     @* Class for creating an object from GET response. content here will still be JSON string, so needs de-serializing further using previous class *@
     public class Content
     {

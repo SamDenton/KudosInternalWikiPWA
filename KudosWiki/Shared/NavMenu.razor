@@ -1,6 +1,6 @@
 ﻿@inject NavigationManager navigationManager
-@inject ContentHolderState contentHolderState
 @inject contentHolder contentHolder
+@inject MyStateContainer myStateContainer
 @using System.Net
 @using System.Net.Http;
 @using System.Net.Http.Headers;
@@ -46,7 +46,7 @@
                     <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
                         <option value="Default" disabled selected>Select a section</option>
                         <option value="all">All Hardware</option>
-                        @foreach (var contentHolder in contentHolderState.ContentHolderListState)
+                        @foreach (var contentHolder in contentHolderList)
                         {
                             if (contentHolder.page == "Hardware")
                             {
@@ -62,7 +62,7 @@
                     <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
                         <option value="Default" disabled selected>Select a section</option>
                         <option value="all">All Software</option>
-                        @foreach (var contentHolder in contentHolderState.ContentHolderListState)
+                        @foreach (var contentHolder in contentHolderList)
                         {
                             if (contentHolder.page == "Software")
                             {
@@ -78,7 +78,7 @@
                     <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
                         <option value="Default" disabled selected>Select a section</option>
                         <option value="all">All Misc</option>
-                        @foreach (var contentHolder in contentHolderState.ContentHolderListState)
+                        @foreach (var contentHolder in contentHolderList)
                         {
                             if (contentHolder.page == "Misc")
                             {
@@ -98,24 +98,34 @@
 </div>
 @* Need to add code to detect changing page and colapsing menu *@
 @code {
+
+    private contentHolder[]? contentHolderList;
+
     private bool collapseNavMenu = true;
 
-    private string sectionDropdown;
-    private string sectionDropdown2;
+    private string? sectionDropdown;
+    private string? sectionDropdown2;
     private bool expandSubNav;
     private bool falseBool = false;
     private string? NavMenuCssClass => !collapseNavMenu ? "collapse" : null;
     private string repoName = "WikiData";
     private string userName = "SamDenton";
-    private string token;
-    
+    private string? token;
+
     protected override async Task OnInitializedAsync()
     {
         var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
-        contentHolderState.ContentHolderListState = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
+        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
+        @* myStateContainer.OnStateChange += RefreshMe; *@
     }
-
+    private async void RefreshMe()
+    {
+        await Task.Delay(1000);
+        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
+        Console.WriteLine(contentHolderList.Last().section);
+        StateHasChanged();
+    }
     @* Retrieve content from GitHub as a JSON string *@
     public async Task<T[]> GetContentFromGitHubRepo<T>(string username, string repositoryName, string token)
     {
@@ -143,14 +153,18 @@
         StateHasChanged();
         if (sectionDropdown2 != null && sectionDropdown2 != "")
         {
+            sectionDropdown2 = "Default";
         }
-        sectionDropdown2 = "Default";
     }
 
     private void NavDetector()
     {
         if (!String.IsNullOrWhiteSpace(sectionDropdown2) && sectionDropdown2 != "Default")
         {
+            foreach (var contentHolder in contentHolderList)
+            {
+                Console.WriteLine("Current section list: " + contentHolder.section);
+            }
             Console.WriteLine(sectionDropdown, sectionDropdown2);
             contentNav(sectionDropdown, sectionDropdown2);
         }

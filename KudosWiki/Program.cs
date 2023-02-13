@@ -9,8 +9,9 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-builder.Services.AddSingleton<ContentHolderState>();
+//builder.Services.AddSingleton<ContentHolderState>();
 builder.Services.AddSingleton<contentHolder>();
+builder.Services.AddSingleton<MyStateContainer>();
 builder.Services.AddMsalAuthentication(options =>
 {
     builder.Configuration.Bind("AzureAd", options.ProviderOptions.Authentication);
