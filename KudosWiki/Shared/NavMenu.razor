@@ -21,7 +21,7 @@
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <nav class="flex-column text-light">
         <div class="nav-item px-3">
-            <NavLink class="nav-link text-light" @onclick="()=>expandSubNav = falseBool" href="" Match="NavLinkMatch.All">
+            <NavLink class="nav-link text-light" @onclick="(() => resetNav())" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
@@ -90,7 +90,12 @@
             }
         }
         <div class="nav-item px-3">
-            <NavLink class="nav-link text-light" href="mainContent/add" @onclick="()=>expandSubNav = falseBool">
+            <NavLink class="nav-link text-light" href="mainContent/all" @onclick="(() => resetNav())">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> All Sections
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link text-light" href="mainContent/add" @onclick="(() => resetNav())">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Add New Section
             </NavLink>
         </div>
@@ -117,7 +122,7 @@
         var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
         contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
-        @* myStateContainer.OnStateChange += RefreshMe; *@
+        myStateContainer.OnStateChange += RefreshMe;
     }
     private async void RefreshMe()
     {
@@ -125,6 +130,12 @@
         contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
         Console.WriteLine(contentHolderList.Last().section);
         StateHasChanged();
+    }
+    public void resetNav()
+    {
+        expandSubNav = false;
+        sectionDropdown = "Default";
+        sectionDropdown2 = "Default";
     }
     @* Retrieve content from GitHub as a JSON string *@
     public async Task<T[]> GetContentFromGitHubRepo<T>(string username, string repositoryName, string token)

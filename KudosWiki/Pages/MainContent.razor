@@ -119,6 +119,51 @@
                                 @* Increment global count *@
                                 count++;
                             }
+                            else if (type == "all")
+                            {
+                                @* There is a way to do this so the sections appear in order.  Maybe if the Type in types foreach was outside the main foreach? *@
+                                @foreach (var Type in types)
+                                {
+                                    @if ( contentHolder.page == Type )
+                                    {
+                                        <tr>
+                                            @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                            <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
+                                            @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
+                                            <td hidden="@IsEditing[count]">@(new MarkupString(@contentHolder.content))</td>
+                                            @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                            <td hidden="@(!IsEditing[count])"><div class="dotted-lines">
+                                                <Editor
+                                                    Id="@count.ToString()"
+                                                    Inline=false
+                                                    CloudChannel="5"
+                                                    Disable=false
+                                                    Conf="@editorConf"
+                                                    ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                                    ClassName="counterEditor"
+                                                    @bind-Value=(contentHolder.content)
+                                                /> 
+                                            </div></td>
+                                        </tr>
+                                        @* Initiate localCount here to button onclick events use the count at create time, not when clicked *@
+                                        var localCount = count;
+                                        var localCountAll = countAll;
+                                        <tr>
+                                            <td>
+                                                @* Spacing *@
+                                            </td>
+                                            @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
+                                            <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
+                                            <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                            <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
+                                            <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
+                                            <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
+                                        </tr>
+                                        @* Increment global count *@
+                                        count++;
+                                    }
+                                }
+                            }
                             countAll++;
                         }
                         @if (type == "add" && IsEditing[0] == true)
@@ -208,7 +253,7 @@
 @code {
     @* Declare custom object array *@
     public contentHolder[]? contentHolderList;
-    
+    private string[] types = {"Hardware", "Software", "Misc"};
     
     //public contentHolder[] ContentHolderListState;
     @* Declare var for current user selection *@
@@ -283,7 +328,7 @@
     private async void Cancel(int localSectionNo, int globalSectionNo)
     {
         Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
-        @* If statement needed here so canceling on a newly added section will remove it *@
+    @* If statement needed here so canceling on a newly added section will remove it *@
         if (initialContent[globalSectionNo] != null)
         {
             contentHolderList[globalSectionNo].content = initialContent[globalSectionNo];
@@ -326,22 +371,24 @@
     @* Method to remove selected section *@
     private async Task RemoveSection(int sectionNo)
     {
-        Console.WriteLine("Global: " + sectionNo);
-    @* Easiest way to remove an element from middle of array is to build a new array from the old, skipping the line to remove, then setting it back to main array *@
-        contentHolder[] newArray = new contentHolder[contentHolderList.Length - 1];
-        int newArrayIndex = 0;
-        for (int i = 0; i < contentHolderList.Length; i++)
+        if (contentHolderList.Length > 1)
         {
-            if (i != sectionNo)
+    @* Easiest way to remove an element from middle of array is to build a new array from the old, skipping the line to remove, then setting it back to main array *@
+            contentHolder[] newArray = new contentHolder[contentHolderList.Length - 1];
+            int newArrayIndex = 0;
+            for (int i = 0; i < contentHolderList.Length; i++)
             {
-                newArray[newArrayIndex++] = contentHolderList[i];
+                if (i != sectionNo)
+                {
+                    newArray[newArrayIndex++] = contentHolderList[i];
+                }
             }
-        }
-        contentHolderList = newArray;
-        ReInitialize();
+            contentHolderList = newArray;
+            ReInitialize();
     @* Serialize and upload to GitHub *@
-        var jsonString = JsonConvert.SerializeObject(contentHolderList);
-        await UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA);
+            var jsonString = JsonConvert.SerializeObject(contentHolderList);
+            await UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA);
+        }
     }
     @* This method should reset lengths of different variables and re-load the page.  Called after a number of state changes *@
     private void ReInitialize()
