@@ -1,0 +1,298 @@
+﻿@page "/InlineTest"
+@using System.Net
+@using System.Net.Http;
+@using System.Net.Http.Headers;
+@using Newtonsoft.Json;
+@inject HttpClient Http;
+@inject NavigationManager Navigation;
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Testing an inline WYSIWYG version of tineMCE editor</h1>
+        @if (contentHolderList == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            var count = 0;
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th class="col-1">Section</th>
+                        <th>Content</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var contentHolder in contentHolderList)
+                        {
+                            <tr>
+                                @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
+                                @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
+                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                <td><div class="dotted-lines tinymce-editor">
+                                    <Editor
+                                        Id="@count.ToString()"
+                                        Inline=true
+                                        CloudChannel="5"
+                                        Disable=false
+                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                        ClassName="counterEditor"
+                                        @bind-Value=(contentHolder.content)
+                                    /> @* Conf="@editorConf" *@
+                                </div></td>
+                        </tr>
+                        count++;
+                    }
+                    <!--
+                    <tr>
+                        <td>
+                            <h3>
+                                <Editor
+                                      Id="inlineTestSection1"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@section1"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    />
+                            </h3>
+                        </td>
+                        <td>
+                            <h2>
+                                <Editor
+                                      Id="inlineTestTitle1"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@title1"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </h2>
+                            <p>
+                                <Editor
+                                      Id="inlineTestInnerSection11"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@innerSection11"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </p>
+                                                    <p>
+                                <Editor
+                                      Id="inlineTestContent11"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@content11"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </p>
+                                                    <p>
+                                <Editor
+                                      Id="inlineTestInnerSection12"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@innerSection12"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </p>
+                            <p>
+                                <Editor
+                                      Id="inlineTestContent12"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@content12"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3>
+                                <Editor
+                                      Id="inlineTestSection2"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@section2"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    />
+                            </h3>
+                        </td>
+                        <td>
+                            <h2>
+                                <Editor
+                                      Id="inlineTestTitle2"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@title2"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </h2>
+                            <p>
+                                <Editor
+                                      Id="inlineTestInnerSection21"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@innerSection21"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </p>
+                                                    <p>
+                                <Editor
+                                      Id="inlineTestContent21"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@content21"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </p>
+                                                    <p>
+                                <Editor
+                                      Id="inlineTestInnerSection22"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@innerSection22"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </p>
+                            <p>
+                                <Editor
+                                      Id="inlineTestContent22"
+                                      Inline=true
+                                      CloudChannel="5"
+                                      @bind-Value="@content22"
+                                      Disable=false
+                                      JsConfSrc="sample"
+                                      ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                      ClassName="tinymce-wrapper"
+                                    /> @*Conf="@editorConfInline"*@
+                            </p>
+                        </td>
+                    </tr>
+                    -->
+                </tbody>
+            </table>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <p>Please Login to see this Content.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    public contentHolder[]? contentHolderList;
+    private string repoName = "WikiData";
+    private string userName = "SamDenton";
+    private string token;
+    private string commitText = "Test From Wiki";
+    private string newSHA; 
+
+    protected override async Task OnInitializedAsync()
+    {
+    @* Get API token from external file.  Token.txt is not included in Commits.  Should probably do the same with my TinyMCE token *@
+        var getFromTokens = await Http.GetAsync("Token.txt");
+        token = await getFromTokens.Content.ReadAsStringAsync();
+    @* Call method to make GET request *@
+        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
+    @* Initialize control variables after populating contentHolderList *@
+        base.OnInitialized();
+    }
+
+    @* Retrieve content from GitHub as a JSON string *@
+    public async Task<T[]> GetContentFromGitHubRepo<T>(string username, string repositoryName, string token)
+    {
+        using (var client = new HttpClient())
+        {
+    @* Initialize the HttpClient object with an authorization header and desired content type *@
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
+    @* Send the GET request to the GitHub API *@
+            var response = await client.GetAsync($"https://api.github.com/repos/{username}/{repositoryName}/contents/data.json");
+    @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
+            var content = await response.Content.ReadAsStringAsync();
+            var gitContent = JsonConvert.DeserializeObject<Content>(content);
+
+           // string gitContentString = new MarkupString(gitContent);
+
+            var contentBytes = Convert.FromBase64String(gitContent.content);
+            var jsonContent = Encoding.UTF8.GetString(contentBytes);
+            var array = JsonConvert.DeserializeObject<T[]>(jsonContent);
+    @* Get the sha of the retrieved file *@ 
+            newSHA = gitContent.sha;
+    @* Not using this return.  I might be able to remove the return type <T[]> from the method deceleration *@
+            return array;
+        }
+    }
+    public class contentHolder
+    {
+        public string? page { get; set; }
+
+        public string? section { get; set; }
+
+        public string? content { get; set; }
+    }
+    
+    @*
+    public class ContentHolderState
+    {
+        public contentHolder[] contentHolderList { get; set; }
+    }
+    *@
+    @* Class for creating an object from GET response. content here will still be JSON string, so needs de-serializing further using previous class *@
+    public class Content
+    {
+        public string content { get; set; }
+        public string encoding { get; set; }
+        public int size { get; set; }
+        public string sha { get; set; }
+    }
+
+    @*
+    private string section1 = new MarkupString("Misc: <small> SQL Queries </small>").ToString();
+    private string title1 = new MarkupString("<h1>Useful SQL Queries</h1>").ToString();
+    private string innerSection11 = new MarkupString("<h2>Nice Format For Audit Trail Queries</h2>").ToString();
+    private string content11 = new MarkupString("<p style=\"padding-left: 40px; line-height: 1;\"><code>SELECT top 100 [desc] as Description,category as Category,part_no as [Part Number],listed_nett_price as [Value Per Unit],disc_pcnt as [Discount %],qty as [Qty Transacted],value as [Net Value],VAT,(value + VAT) as [Gross Value],supplier_code as [Supplier Code],trans_type as [Type],Stock_type as [Stock Type],branchID as Branch,qtyheld as [In Stock],giftaid as [Gift Aid],StockID as [Stock ID],staff_id as Staff,trans_time as [Date and Time]</code></p>").ToString();
+    private string innerSection12 = new MarkupString("<h2>Sum Net Sales, VAT and Gross Sales</h2>").ToString();
+    private string content12 = new MarkupString("<h4>Set correct branch ID and date</h4>\n<p style=\"padding-left: 40px; line-height: 1;\"><code>SELECT sum([value]) as [Net Sales],sum(vat) as [VAT],sum([value]+vat) as [Gross Sales]</code></p>\n<p style=\"padding-left: 40px; line-height: 1;\"><code>FROM audit</code></p>\n<p style=\"padding-left: 40px; line-height: 1;\"><code>WHERE branchID = 6</code></p>\n<p style=\"padding-left: 40px; line-height: 1;\"><code>AND trans_date = '12/14/22'</code></p>\n<p style=\"padding-left: 40px; line-height: 1;\"><code>AND trans_type in ('cs','crs')</code></p>").ToString();
+    private string section2 = new MarkupString("Misc: <small> CMD Cheat Sheet </small>").ToString();
+    private string title2 = new MarkupString("<h1>Useful CMD commands</h1>").ToString();
+    private string innerSection21 = new MarkupString("<p>List all currently available COM ports, including port settings like Baud Rate and Parity.  Ports will not show in this list if they are reserved by a device:</p>").ToString();
+    private string content21 = new MarkupString("<p style=\"padding-left: 40px;\">mode</p>").ToString();
+    private string innerSection22 = new MarkupString("<h4>Lists the port settings for a specific COM port; X normally between 1 and 7:</h4>").ToString();
+    private string content22 = new MarkupString("<p style=\"padding-left: 40px;\">mode comX</p>").ToString();
+    *@
+}

@@ -8,6 +8,26 @@ html, body {
     color: #0d1f5b;
 }
 
+.tinymce-editor {
+    position: relative;
+}
+
+.sticky-header {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    right: 0;
+    z-index: 1;
+}
+
+.tox-tinymce--toolbar-sticky-on .tox-editor-header {
+    position: fixed;
+    top: 300px;
+    left: 0;
+    right: 0;
+    z-index: 1;
+}
+
 h1:focus {
     outline: none;
 }
