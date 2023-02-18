@@ -75,7 +75,7 @@
                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                         <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
                                         @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
-                                        <td hidden="@IsEditing[count]">@(new MarkupString(@contentHolder.content))</td>
+                                        <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                         @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                         <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
                                             <Editor
@@ -140,7 +140,7 @@
                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                         <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
                                         @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
-                                        <td hidden="@IsEditing[count]">@(new MarkupString(@contentHolder.content))</td>
+                                        <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                         @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                         <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
                                             <Editor
@@ -206,7 +206,7 @@
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                 <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
                                                 @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
-                                                <td hidden="@IsEditing[count]">@(new MarkupString(@contentHolder.content))</td>
+                                                <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                 <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
                                                     <Editor
@@ -243,7 +243,7 @@
                             }
                             else if (type == "Search")
                             {
-                                if (contentHolder.section.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || contentHolder.content.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                                if (contentHolder.section!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || contentHolder.content!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
                                 {
                                     if (inline == true)
                                     {
@@ -271,7 +271,7 @@
                                             @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                             <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
                                             @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
-                                            <td hidden="@IsEditing[count]">@(new MarkupString(@contentHolder.content))</td>
+                                            <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                             @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                             <td hidden="@(!IsEditing[count])">
                                                 <div class="dotted-lines tinymce-editor">
@@ -309,11 +309,10 @@
                             }
                         countAll++;
                         }
-                        @if (type == "add" && IsEditing[0] == true)
+                        @if (type == "add" && IsEditing![0] == true)
                         {
                             if (inline == true)
                             {
-                                var localCount = 0;
                                 count = 0;
                                 var localCountAll = countAll;
                                 <tr>
@@ -340,7 +339,7 @@
                                 <tr>
                                     <td>New Section: </td>
                                     @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
-                                    <td hidden="@IsEditing[count]">@(new MarkupString(contentHolderList.Last().content))</td>
+                                    <td hidden="@IsEditing[count]">@(new MarkupString(contentHolderList.Last().content!))</td>
                                     <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
                                         <Editor
                                             Id="@count.ToString()"
@@ -407,7 +406,7 @@
     <NotAuthorized>
         @* If user is not authorized, call RedirectHome *@
         <p>Please Login to see this Content.  Redirecting...</p>
-        @if(!context.User.Identity.IsAuthenticated)
+        @if(!context.User.Identity!.IsAuthenticated)
         {
             RedirectHome();
         }
@@ -417,7 +416,7 @@
     @* Declare custom object array *@
     public contentHolder[]? contentHolderList;
     public List<contentHolder> searchResults = new List<contentHolder>();
-    public string searchTerm { get; set; }
+    public string? searchTerm { get; set; }
     private string[] types = {"Hardware", "Software", "Misc"};
     
     //public contentHolder[] ContentHolderListState;
@@ -427,17 +426,17 @@
     [Parameter]
     public string? sections { get; set; }
     @* Declare Global Vars *@
-    private bool inline { get; set; } = false;
-    private string[] initialContent;
-    private bool[] IsEditing;
-    private string sectionDropdown;
-    private string sectionName;
+    private bool? inline { get; set; } = false;
+    private string[]? initialContent;
+    private bool[]? IsEditing;
+    private string? sectionDropdown;
+    private string? sectionName;
     @* Declare/Initialize variables for API communication *@
-    private string repoName = "WikiData";
-    private string userName = "SamDenton";
-    private string token;
-    private string commitText = "Test From Wiki";
-    private string newSHA; 
+    private string? repoName = "WikiData";
+    private string? userName = "SamDenton";
+    private string? token;
+    private string? commitText = "Test From Wiki";
+    private string? newSHA; 
     @* Initialize page.  Using Async initialization as I want to load content from API before rendering *@
     protected override async Task OnInitializedAsync()
     {
@@ -445,7 +444,7 @@
         var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
     @* Call method to make GET request *@
-        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
+        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName!, repoName!, token);
         myStateContainer.OnStateChange += StateHasChanged;
         //myStateContainer.SetValue();
     @* Initialize control variables after populating contentHolderList *@
@@ -453,14 +452,15 @@
         IsEditing = new bool[contentHolderList.Length];
         base.OnInitialized();
     }
-    @* Function to trigger when content is refreshed *@
+    @* Function to trigger when content is refreshed.  This code is to solve an issue where swtiching between pages and inline editor could leave a section edited, and it would show in the add section page *@
     protected override void OnAfterRender(bool firstRender)
     {
         if (!firstRender)
         {
-            for(int i = 0; i < IsEditing.Length; i++)
+            for(int i = 0; i < IsEditing!.Length; i++)
             {
-                IsEditing[i] = false;
+                //had to remove for now as it seem the eritor refreshes the screen ever time the content is updated
+               // IsEditing[i] = false;
             }
         }
     }
@@ -473,21 +473,21 @@
     private void ClearContent(int localSectionNo, int globalSectionNo)
     {
         Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
-        contentHolderList[globalSectionNo].content = "";
-        IsEditing[localSectionNo] = true;
+        contentHolderList![globalSectionNo].content = "";
+        IsEditing![localSectionNo] = true;
     }
     @* Set selected sections IsEditing to True, which should render the editor *@
     private void Edit(int localSectionNo, int globalSectionNo)
     {
         Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
     @* When you click edit, save the current state so 'Cancel' button can revert changes *@
-        initialContent[globalSectionNo] = contentHolderList[globalSectionNo].content;
-        IsEditing[localSectionNo] = true;
+        initialContent![globalSectionNo] = contentHolderList![globalSectionNo].content!;
+        IsEditing![localSectionNo] = true;
     }
     @* Set selected section's IsEditing to false, then call method to PUT new JSON to GitHub.  Should render updated content to DOM *@
     private async void Save(int sectionNo)
     {
-        IsEditing[sectionNo] = false;
+        IsEditing![sectionNo] = false;
     @* Update the array for navigation *@
         myStateContainer.SetValue();
         myStateContainer.OnStateChange += RefreshMe;
@@ -495,7 +495,7 @@
         //StateHasChanged();
     @* Serialize current object array to a JSON String *@
         var jsonString = JsonConvert.SerializeObject(contentHolderList);
-        await UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA);
+        await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
     }
     private void RefreshMe()
     {
@@ -506,19 +506,19 @@
     {
         Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
     @* If statement needed here so canceling on a newly added section will remove it *@
-        if (initialContent[globalSectionNo] != null)
+        if (initialContent![globalSectionNo] != null)
         {
-            contentHolderList[globalSectionNo].content = initialContent[globalSectionNo];
+            contentHolderList![globalSectionNo].content = initialContent[globalSectionNo];
         }
         else
         {
-            await RemoveSection(contentHolderList.Length - 1);
+            await RemoveSection(contentHolderList!.Length - 1);
         }
-        IsEditing[localSectionNo] = false;
+        IsEditing![localSectionNo] = false;
     }
     private void CancelNew(int localSectionNo)
     {
-        IsEditing[localSectionNo] = false;
+        IsEditing![localSectionNo] = false;
     }
     @* Add a new object to my array from user input *@
     private void AddNewSection()
@@ -529,8 +529,8 @@
         if (!String.IsNullOrWhiteSpace(type) && !String.IsNullOrWhiteSpace(name)) @* type != null && type != "" && type != " " && name != null && name != "" && name != " " *@
         {
     @* Best way to add to an array is to resize then initialize the new index *@
-            Array.Resize(ref contentHolderList, contentHolderList.Length + 1);
-            Array.Resize(ref IsEditing, IsEditing.Length + 1);
+            Array.Resize(ref contentHolderList, contentHolderList!.Length + 1);
+            Array.Resize(ref IsEditing, IsEditing!.Length + 1);
             contentHolderList[contentHolderList.Length - 1] = new contentHolder { 
                 page = type, 
                 section = name, 
@@ -548,7 +548,7 @@
     @* Method to remove selected section *@
     private async Task RemoveSection(int sectionNo)
     {
-        if (contentHolderList.Length > 1)
+        if (contentHolderList!.Length > 1)
         {
     @* Easiest way to remove an element from middle of array is to build a new array from the old, skipping the line to remove, then setting it back to main array *@
             contentHolder[] newArray = new contentHolder[contentHolderList.Length - 1];
@@ -564,7 +564,7 @@
             ReInitialize();
     @* Serialize and upload to GitHub *@
             var jsonString = JsonConvert.SerializeObject(contentHolderList);
-            await UpdateJSONOnGitHub(jsonString, repoName, userName, token, commitText, newSHA);
+            await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
         }
     }
     @* Code to search string and create new list from results *@
@@ -582,7 +582,7 @@
     @* This method should reset lengths of different variables and re-load the page.  Called after a number of state changes *@
     private void ReInitialize()
     {
-        initialContent = new string[contentHolderList.Length];
+        initialContent = new string[contentHolderList!.Length];
         IsEditing = new bool[contentHolderList.Length];
         StateHasChanged();
     }
@@ -610,7 +610,7 @@
             var responceHeaders = await response.Content.ReadAsStringAsync();
     @* Get new sha value from PUT response headers *@
             var gitContent = JsonConvert.DeserializeObject<Root>(responceHeaders);
-            newSHA = gitContent.content.sha;
+            newSHA = gitContent!.content!.sha!;
     @* Ensure the request was successful *@
             response.EnsureSuccessStatusCode();
         }
@@ -628,13 +628,13 @@
     @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
             var content = await response.Content.ReadAsStringAsync();
             var gitContent = JsonConvert.DeserializeObject<Content>(content);
-            var contentBytes = Convert.FromBase64String(gitContent.content);
+            var contentBytes = Convert.FromBase64String(gitContent!.content!);
             var jsonContent = Encoding.UTF8.GetString(contentBytes);
             var array = JsonConvert.DeserializeObject<T[]>(jsonContent);
     @* Get the sha of the retrieved file *@ 
-            newSHA = gitContent.sha;
+            newSHA = gitContent.sha!;
     @* Not using this return.  I might be able to remove the return type <T[]> from the method deceleration *@
-            return array;
+            return array!;
         }
     }
     @* Not using this method currently, but might be useful if I split content across pages / files on GitHub *@
@@ -688,7 +688,7 @@
         {"menubar", "edit insert format table tools help"}, 
     @* Would like to condence toolbar in to a few dropdowns, but converting JS syntax to C# is a pain *@
         {"toolbar", "undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl"},
-        {"plugins", "blocks link image table lists advlist code emoticons wordcount importcss autoresize quickbars codesample help"}, //imagetools spellchecker - Removed as imagetools now premium and spellchecker depricated
+        {"plugins", "link image table lists advlist code emoticons wordcount importcss autoresize quickbars codesample help"}, //imagetools spellchecker - Removed as imagetools now premium and spellchecker depricated
         {"contextmenu", "link image imagetools table spellchecker lists undo redo | inserttable | cell row column deletetable | help"},
         {"table_toolbar", "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol"},
         {"quickbars_selection_toolbar", "bold italic underline | fontfamily fontsize blocks | bullist numlist | blockquote quicklink"},
@@ -707,7 +707,7 @@
     };
     private Dictionary<string, object> editorConfInline = new Dictionary<string, object>  {
     @* Would like to condence toolbar in to a few dropdowns, but converting JS syntax to C# is a pain *@
-        {"plugins", "blocks autolink media link image table lists advlist code emoticons wordcount importcss autoresize quickbars codesample help"}, //imagetools spellchecker - Removed as imagetools now premium and spellchecker depricated
+        {"plugins", "autolink media link image table lists advlist code emoticons wordcount importcss autoresize quickbars codesample help"}, //imagetools spellchecker - Removed as imagetools now premium and spellchecker depricated
         {"contextmenu", " link image imagetools table spellchecker lists undo redo | inserttable | cell row column deletetable | help"},
         {"table_toolbar", "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol"},
         {"quickbars_selection_toolbar", "undo redo | bold italic underline strikethrough | fontfamily fontsize | blocks | bullist numlist | alignleft aligncenter alignright alignjustify | outdent indent | forecolor backcolor | blockquote quicklink | charmap emoticons | print | insertfile image media template link anchor codesample | removeformat"},
