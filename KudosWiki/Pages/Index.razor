@@ -6,6 +6,16 @@
 
 <PageTitle>Index</PageTitle>
 
+<div class="container-fluid bg-dark text-light text-right">
+    <AuthorizeView>
+        <Authorized>
+            <p>Welcome, @context.User.Identity.Name</p>
+        </Authorized>
+        <NotAuthorized>
+            <p>Not yet logged in</p>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
 <div class="container-fluid bg-dark text-light">
     <div class="row">
         <div class="col-12 text-center">
@@ -18,16 +28,6 @@
             <p>This is the internal wiki for our company. It contains a wealth of information, resources, and documentation that will help you understand and use our products and services.</p>
         </div>
     </div>
-</div>
-<div class="container-fluid bg-dark text-light text-right">
-    <AuthorizeView>
-        <Authorized>
-            <p>Welcome, @context.User.Identity.Name</p>
-        </Authorized>
-        <NotAuthorized>
-            <p>Not yet logged in</p>
-        </NotAuthorized>
-    </AuthorizeView>
 </div>
 
 @code {
