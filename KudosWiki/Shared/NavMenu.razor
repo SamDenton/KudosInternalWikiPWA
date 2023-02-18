@@ -46,7 +46,7 @@
                     <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
                         <option value="Default" disabled selected>Select a section</option>
                         <option value="all">All Hardware</option>
-                        @foreach (var contentHolder in contentHolderList)
+                        @foreach (var contentHolder in contentHolderList!)
                         {
                             if (contentHolder.page == "Hardware")
                             {
@@ -62,7 +62,7 @@
                     <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
                         <option value="Default" disabled selected>Select a section</option>
                         <option value="all">All Software</option>
-                        @foreach (var contentHolder in contentHolderList)
+                        @foreach (var contentHolder in contentHolderList!)
                         {
                             if (contentHolder.page == "Software")
                             {
@@ -78,7 +78,7 @@
                     <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
                         <option value="Default" disabled selected>Select a section</option>
                         <option value="all">All Misc</option>
-                        @foreach (var contentHolder in contentHolderList)
+                        @foreach (var contentHolder in contentHolderList!)
                         {
                             if (contentHolder.page == "Misc")
                             {
@@ -99,13 +99,6 @@
                 <span class="oi oi-plus" aria-hidden="true"></span> Add New Section
             </NavLink>
         </div>
-        @* 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link text-light" href="InlineTest" @onclick="(() => resetNav())">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Testing Inline Editor
-            </NavLink>
-        </div>
-        *@
     </nav>
 </div>
 @* Need to add code to detect changing page and colapsing menu *@
@@ -118,7 +111,6 @@
     private string? sectionDropdown;
     private string? sectionDropdown2;
     private bool expandSubNav;
-    private bool falseBool = false;
     private string? NavMenuCssClass => !collapseNavMenu ? "collapse" : null;
     private string repoName = "WikiData";
     private string userName = "SamDenton";
@@ -128,13 +120,13 @@
     {
         var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
-        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
+        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
         myStateContainer.OnStateChange += RefreshMe;
     }
     private async void RefreshMe()
     {
         await Task.Delay(1000);
-        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token);
+        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
         Console.WriteLine(contentHolderList.Last().section);
         StateHasChanged();
     }
@@ -157,12 +149,12 @@
             @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
             var content = await response.Content.ReadAsStringAsync();
             var gitContent = JsonConvert.DeserializeObject<Content>(content);
-            var contentBytes = Convert.FromBase64String(gitContent.content);
+            var contentBytes = Convert.FromBase64String(gitContent!.content!);
             var jsonContent = Encoding.UTF8.GetString(contentBytes);
             var array = JsonConvert.DeserializeObject<T[]>(jsonContent);
             @* Get the sha of the retrieved file *@ 
             @* newSHA = gitContent.sha; *@
-            return array;
+            return array!;
         }
     }
 
@@ -179,12 +171,12 @@
     {
         if (!String.IsNullOrWhiteSpace(sectionDropdown2) && sectionDropdown2 != "Default")
         {
-            foreach (var contentHolder in contentHolderList)
+            foreach (var contentHolder in contentHolderList!)
             {
                 Console.WriteLine("Current section list: " + contentHolder.section);
             }
-            Console.WriteLine(sectionDropdown, sectionDropdown2);
-            contentNav(sectionDropdown, sectionDropdown2);
+            Console.WriteLine(sectionDropdown!, sectionDropdown2);
+            contentNav(sectionDropdown!, sectionDropdown2);
         }
     }
 
@@ -194,20 +186,10 @@
     }
     private void contentNav(string type, string section)
     {
-        //type = "Hardware";
-        //section = "CMD";
         navigationManager.NavigateTo($"/mainContent/{type}/{section}");
     }
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
-    }
-    private void SelectContent(string type, string section)
-    {
-        // Update the state with the selected values
-       // SelectedType = type;
-        //SelectedSection = section;
-        // Trigger the method to fetch the corresponding content
-        //GetContent();
     }
 }
