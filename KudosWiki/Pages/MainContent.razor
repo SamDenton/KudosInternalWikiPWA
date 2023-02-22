@@ -6,7 +6,6 @@
 @inject HttpClient Http;
 @inject NavigationManager Navigation;
 @inject MyStateContainer myStateContainer
-@implements IDisposable
 @* Using Authorize View to only load content when user is authenticated.  If not logged in, they should be redirected to a Microsoft authenticator *@
 <AuthorizeView>
     <Authorized>
@@ -14,12 +13,12 @@
         <div class="sticky-header" id="stickyToolbar"></div>
         <div>
             <div class="form-group form-check form-switch">
-                <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" />
+                <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
                 <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
             </div>
             <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Search" @bind="searchTerm" @bind:event="oninput">
-                <button class="btn btn-outline-primary" type="button" @onclick="(() => Search(searchTerm))">Toggle Search</button>
+                <input class="form-control" placeholder="Search" @bind="searchTerm" @bind:event="oninput" @onkeyup="SearchTermChanged" >
+               <!-- <button class="btn btn-outline-primary" type="button" @onclick="(() => Search(searchTerm))">Toggle Search</button> -->
             </div>
             <h1>@type: <small class="text-muted">@sections </small></h1>
             @* Show a loading message before API call is complete *@
@@ -34,6 +33,7 @@
                 var count = 0;
                 var countAll = 0;
                 var clearText = "";
+                var username = @context.User.Identity!.Name;
                 <table class="table table-dark table-striped">
                     <thead>
                         <tr>
@@ -99,7 +99,7 @@
                                         <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                         <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
                                         <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
+                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username))" hidden="@(!IsEditing[localCount])">Save</button>
                                         <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                     </tr>
                                 }
@@ -164,7 +164,7 @@
                                         <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                         <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
                                         <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
+                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username))" hidden="@(!IsEditing[localCount])">Save</button>
                                         <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                     </tr>
                                 }
@@ -230,7 +230,7 @@
                                                 <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                 <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username))" hidden="@(!IsEditing[localCount])">Save</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                             </tr>
                                         }
@@ -296,7 +296,7 @@
                                                 <button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                 <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username))" hidden="@(!IsEditing[localCount])">Save</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button>
                                             </td>
                                         </tr>
@@ -357,7 +357,7 @@
                                     </td>
                                     @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                     <td><button class="btn btn-outline-warning" @onclick="()=>contentHolderList.Last().content = clearText">Clear</button>
-                                    <button class="btn btn-outline-primary" @onclick="(() => Save(localCount))" hidden="@(!IsEditing[localCount])">Save</button>
+                                    <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username))" hidden="@(!IsEditing[localCount])">Save</button>
                                     <button class="btn btn-outline-primary" @onclick="(() => CancelNew(localCount))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                 </tr>
                             }
@@ -434,7 +434,7 @@
     private string? userName = "SamDenton";
     private string? token;
     private string? commitText = "Test From Wiki";
-    private string? newSHA; 
+    private string? newSHA;
     @* Initialize page.  Using Async initialization as I want to load content from API before rendering *@
     protected override async Task OnInitializedAsync()
     {
@@ -448,19 +448,48 @@
     @* Initialize control variables after populating contentHolderList *@
         initialContent = new string[contentHolderList.Length];
         IsEditing = new bool[contentHolderList.Length];
+        @* Add event handler to nagigation change event to reset IsEditing array *@
+        Navigation.LocationChanged += LocationChanged!;
         base.OnInitialized();
     }
     @* Function to trigger when content is refreshed.  This code is to solve an issue where swtiching between pages and inline editor could leave a section edited, and it would show in the add section page *@
     protected override void OnAfterRender(bool firstRender)
     {
-        if (!firstRender)
+        base.OnAfterRender(firstRender);
+    }
+    private void LocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        ClearIsEditingArray();
+    }
+    private void ClearIsEditingArray()
+    {
+                if (IsEditing != null)
         {
-            for(int i = 0; i < IsEditing!.Length; i++)
+            for (int i = 0; i < IsEditing!.Length; i++)
             {
-                //had to remove for now as it seem the eritor refreshes the screen ever time the content is updated
-               // IsEditing[i] = false;
+                IsEditing[i] = false;
+                Console.WriteLine(i +""+ IsEditing[i] + " Out of: " + IsEditing.Length);
+                StateHasChanged();
             }
         }
+    }
+    private void SearchTermChanged()
+    {
+        if (type != "Search")
+        {
+            if (searchTerm!.Length > 1)
+            {
+                Navigation.NavigateTo($"/mainContent/Search");
+            }
+        }
+        else
+        {
+            if (String.IsNullOrWhiteSpace(searchTerm))
+            {
+                Navigation.NavigateTo($"/mainContent/all");
+            }
+        }
+
     }
     @* Currently actually redirects to Microsoft Authentication popup, but might change this to home *@
     protected private void RedirectHome()
@@ -483,14 +512,13 @@
         IsEditing![localSectionNo] = true;
     }
     @* Set selected section's IsEditing to false, then call method to PUT new JSON to GitHub.  Should render updated content to DOM *@
-    private async void Save(int sectionNo)
+    private async void Save(int sectionNo, string username)
     {
         IsEditing![sectionNo] = false;
+        commitText = "Content change made by: " + username + "";
     @* Update the array for navigation *@
         myStateContainer.SetValue();
         myStateContainer.OnStateChange += RefreshMe;
-        //Navigation.NavigateTo($"/mainContent/add");
-        //StateHasChanged();
     @* Serialize current object array to a JSON String *@
         var jsonString = JsonConvert.SerializeObject(contentHolderList);
         await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
@@ -560,21 +588,11 @@
             }
             contentHolderList = newArray;
             ReInitialize();
+            myStateContainer.SetValue();
+            myStateContainer.OnStateChange += RefreshMe;
     @* Serialize and upload to GitHub *@
             var jsonString = JsonConvert.SerializeObject(contentHolderList);
             await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
-        }
-    }
-    @* Code to search string and create new list from results *@
-    public void Search(string searchTerm)
-    {
-        if (type == "Search")
-        {
-            Navigation.NavigateTo($"/mainContent/all");
-        }
-        else
-        {
-            Navigation.NavigateTo($"/mainContent/Search");
         }
     }
     @* This method should reset lengths of different variables and re-load the page.  Called after a number of state changes *@
@@ -686,8 +704,8 @@
         {"menubar", "edit insert format table tools help"}, 
     @* Would like to condence toolbar in to a few dropdowns, but converting JS syntax to C# is a pain *@
         {"toolbar", "undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl"},
-        {"plugins", "link image table lists advlist code emoticons wordcount importcss autoresize quickbars codesample help"}, //imagetools spellchecker - Removed as imagetools now premium and spellchecker depricated
-        {"contextmenu", "link image imagetools table spellchecker lists undo redo | inserttable | cell row column deletetable | help"},
+        {"plugins", "autolink media link image table lists advlist code emoticons wordcount importcss autoresize quickbars codesample help"}, //imagetools spellchecker - Removed as imagetools now premium and spellchecker depricated
+        {"contextmenu", "link image imagetools table lists undo redo | inserttable | cell row column deletetable | help"},
         {"table_toolbar", "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol"},
         {"quickbars_selection_toolbar", "bold italic underline | fontfamily fontsize blocks | bullist numlist | blockquote quicklink"},
         {"quickbars_insert_toolbar", "quicktable image media codesample" },
@@ -699,14 +717,14 @@
         {"min_height", 100},
         {"autoresize_bottom_margin", 30},
         {"skin", "oxide-dark"},
-        {"content_css", "dark, css/app.css"},
+        {"content_css", "dark"},
         {"autosave_ask_before_unload", "true"},
         {"resize", "both"} @* Allows user to resize using bottom right corner.  Should still respect min height and width *@
     };
     private Dictionary<string, object> editorConfInline = new Dictionary<string, object>  {
     @* Would like to condence toolbar in to a few dropdowns, but converting JS syntax to C# is a pain *@
         {"plugins", "autolink media link image table lists advlist code emoticons wordcount importcss autoresize quickbars codesample help"}, //imagetools spellchecker - Removed as imagetools now premium and spellchecker depricated
-        {"contextmenu", " link image imagetools table spellchecker lists undo redo | inserttable | cell row column deletetable | help"},
+        {"contextmenu", " link image imagetools table lists undo redo | inserttable | cell row column deletetable | help"},
         {"table_toolbar", "tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol"},
         {"quickbars_selection_toolbar", "undo redo | bold italic underline strikethrough | fontfamily fontsize | blocks | bullist numlist | alignleft aligncenter alignright alignjustify | outdent indent | forecolor backcolor | blockquote quicklink | charmap emoticons | print | insertfile image media template link anchor codesample | removeformat"},
         {"toolbar", "false"},
@@ -716,12 +734,13 @@
         {"width", "100%"},
         {"min_width", "100%"},
         {"height", "100%"}, @* Using autosize plugin, height property should be ignored. Min_height still respected *@
-        {"min_height", 100},
+    {"min_height", 100},
         {"autoresize_bottom_margin", 30},
         {"skin", "oxide-dark"},
-        {"content_css", "dark, css/app.css"},
+        {"content_css", "dark"},
         {"autosave_ask_before_unload", "true"},
-        {"resize", "both"} @* Allows user to resize using bottom right corner.  Should still respect min height and width *@
+        {"resize", "both"} 
+    @* Allows user to resize using bottom right corner.  Should still respect min height and width *@
     };
 
       @*{"toolbar_sticky", "true"},
