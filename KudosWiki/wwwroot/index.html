@@ -15,7 +15,22 @@
 </head>
 
 <body>
-    <div id="app">Loading...</div>
+    <div id="app" class="bg-dark" style="height: 100vh">
+        Loading...
+        <div class="container-fluid bg-dark text-light">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <img src="Kudos_logo.png" alt="Company Logo" height="165" width="272" class="mx-auto d-block img-fluid" />
+                    <h1 class="mt-3">Welcome to the Internal Wiki</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p>This is the internal wiki for our company. It contains a wealth of information, resources, and documentation that will help you understand and use our products and services.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -25,7 +40,7 @@
     <script src="_content/Microsoft.Authentication.WebAssembly.Msal/AuthenticationService.js"></script>
     <script src="_content/TinyMCE.Blazor/tinymce-blazor.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
-    <script>navigator.serviceWorker.register('/service-worker.js?version=9');</script>
+    <script>navigator.serviceWorker.register('/service-worker.js');</script>
 </body>
 
 </html >

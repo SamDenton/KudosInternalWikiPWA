@@ -12,6 +12,16 @@ html, body {
     position: relative;
 }
 
+.extraNavBarClass   {
+    display: none;
+}
+
+@media (min-width: 1000px) {
+    .extraNavBarClass {
+        display: none;
+    }
+}
+
 .sticky-header {
     position: fixed;
     top: 20px;
