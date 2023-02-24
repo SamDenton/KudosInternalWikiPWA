@@ -8,6 +8,10 @@ html, body {
     color: #0d1f5b;
 }
 
+.sticky-offset  {
+    top: 50px;
+}
+
 .tinymce-editor {
     position: relative;
 }

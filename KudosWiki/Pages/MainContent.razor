@@ -19,13 +19,14 @@
                     }
                     else
                     {
-                        <table class="table table-dark table-hover table-bordered align-middle"> @* table-sm text-center *@
+                        <table class="table table-dark table-hover table-bordered align-middle sticky-top pt-5"> @* table-sm text-center *@
                             <thead style="background-color: #0d1f5b !important"> @* class="table-secondary" *@
                                 <tr>
                                     <th><u>Section List</u></th>
                                 </tr>
                             </thead>
                             <tbody class="table-group-divider">
+                                <tr><td><a onclick="@(() => navigateToSection("all", null))">All Sections</a></td></tr>
                                 @* Should add some code here so each type is seporated by a header *@
                                 @foreach (var contentHolder in contentHolderList)
                                 {
@@ -46,7 +47,10 @@
                                 <input class="form-control" placeholder="Search" @bind="searchTerm" @bind:event="oninput" @onkeyup="SearchTermChanged" >
                                 <!-- <button class="btn btn-outline-primary" type="button" @onclick="(() => Search(searchTerm))">Toggle Search</button> -->
                             </div>
-                            <h1>@type: <small class="text-muted">@sections </small></h1>
+                            @if (type != "all")
+                            {
+                                <h1>@type: <small class="text-muted">@sections </small></h1>
+                            }
                             @* Show a loading message before API call is complete *@
                             @* Might add a timer so it displays a different message if the request takes too long *@
                             @* Should also add failure case if the API call returns 404 *@
