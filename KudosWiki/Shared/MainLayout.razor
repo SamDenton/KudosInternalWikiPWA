@@ -1,8 +1,18 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
+
     <div class="sidebar">
-        <NavMenu />
+        <div class="ps-3 navbar">
+            <div class="container-fluid">
+                <h4 class=".kudosText">
+                    Kudos <small class="text-muted">Internal Wiki</small>
+                </h4>
+            </div>
+        </div>
+        <div class="sidebar overflow-auto" style="height: calc(100vh - 56px);">
+            <NavMenu />
+        </div>
     </div>
 
     <main class="bg-dark text-light">

@@ -1,4 +1,4 @@
-﻿@page "/mainContent/{type}/{sections?}"
+﻿@page "/{type?}/{sections?}"
 @using System.Net
 @using System.Net.Http;
 @using System.Net.Http.Headers;
@@ -9,82 +9,214 @@
 @* Using Authorize View to only load content when user is authenticated.  If not logged in, they should be redirected to a Microsoft authenticator *@
 <AuthorizeView>
     <Authorized>
-        <PageTitle>Content</PageTitle>
+        <PageTitle>Wiki</PageTitle>
+        <div class="ps-1 pt-2 sticky-top container-flex" id="searchBar">
+            <div class="row">
+                <div class="col-3">
+                </div>
+                <div class="col-5">
+                    <div class="input-group mb-3 text-light">
+                        <input class="form-control bg-dark text-light" placeholder="Search" @bind="searchTerm" @bind:event="oninput" @onkeyup="SearchTermChanged" >
+                    </div>
+                </div>
+                <div class="col-4">
+                </div>
+            </div>
+        </div>
         <div class="container-fluid mx-0 ps-0">
+                <div class="ms-1 form-group form-check form-switch">
+                    <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
+                    <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
+                </div>
             <div class="row mx-0 ps-0 gx-3">
-                <div class="col-1 mx-0 ps-0">
+                <div class="col">
+                    @if (type != "all" && type != null)
+                    {
+                        <h1>@type: <small class="text-muted">@sections </small></h1>
+                    }
+                    @* Show a loading message before API call is complete *@
+                    @* Might add a timer so it displays a different message if the request takes too long *@
+                    @* Should also add failure case if the API call returns 404 *@
                     @if (contentHolderList == null)
                     {
                         <p><em>Loading...</em></p>
                     }
+                    else if (type == null)
+                    {
+                        <div class="container-fluid bg-dark text-light">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <img src="@Logo" alt="Company Logo" height="165" width="272" class="mx-auto d-block img-fluid" />
+                                    <h1 class="mt-3">Welcome to the Internal Wiki</h1>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <p>This is the internal wiki for our company. It contains a wealth of information, resources, and documentation that will help you understand and use our products and services.</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
                     else
                     {
-                        <table class="table table-dark table-hover table-bordered align-middle sticky-top pt-5"> @* table-sm text-center *@
-                            <thead style="background-color: #0d1f5b !important"> @* class="table-secondary" *@
+                        var count = 0;
+                        var countAll = 0;
+                        var clearText = "";
+                        var username = @context.User.Identity!.Name;
+                        <table class="table rounded @(inline == true ? "table-dark table-bordered" : "table-dark table-striped")"> 
+                            <thead>
                                 <tr>
-                                    <th><u>Section List</u></th>
+                                    <th class="col-1"></th>
+                                    <th></th>
                                 </tr>
                             </thead>
-                            <tbody class="table-group-divider">
-                                <tr><td><a onclick="@(() => navigateToSection("all", null))">All Sections</a></td></tr>
-                                @* Should add some code here so each type is seporated by a header *@
+                            <tbody>
+                                @* Pragmatically populate the table using my customer object array *@
                                 @foreach (var contentHolder in contentHolderList)
                                 {
-                                    <tr><td><a onclick="@(() => navigateToSection(@contentHolder.page!, @contentHolder.section!))"><p>@contentHolder.section</p></a></td></tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                </div>
-                <div class="col-11">
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-group form-check form-switch">
-                                <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
-                                <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
-                            </div>
-                            <div class="input-group mb-3">
-                                <input class="form-control" placeholder="Search" @bind="searchTerm" @bind:event="oninput" @onkeyup="SearchTermChanged" >
-                                <!-- <button class="btn btn-outline-primary" type="button" @onclick="(() => Search(searchTerm))">Toggle Search</button> -->
-                            </div>
-                            @if (type != "all")
-                            {
-                                <h1>@type: <small class="text-muted">@sections </small></h1>
-                            }
-                            @* Show a loading message before API call is complete *@
-                            @* Might add a timer so it displays a different message if the request takes too long *@
-                            @* Should also add failure case if the API call returns 404 *@
-                            @if (contentHolderList == null)
-                            {
-                                <p><em>Loading...</em></p>
-                            }
-                            else
-                            {
-                                var count = 0;
-                                var countAll = 0;
-                                var clearText = "";
-                                var username = @context.User.Identity!.Name;
-                                <table class="table table-dark table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th class="col-1">Section</th>
-                                            <th>Content</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @* Pragmatically populate the table using my customer object array *@
-                                        @foreach (var contentHolder in contentHolderList)
+                                    @if (type == contentHolder.page && sections == contentHolder.section)
+                                    {
+                                        if (inline == true)
                                         {
-                                            @if (type == contentHolder.page && sections == contentHolder.section)
+                                            var localCount = count;
+                                            <tr>
+                                                @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                                <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
+                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                                <td><div class="dotted-lines" @onfocusout="(() => Save(localCount, username!))">
+                                                    <Editor
+                                                        Id="@count.ToString()"
+                                                        Inline=true
+                                                        CloudChannel="5"
+                                                        Disable=false
+                                                        Conf="@editorConfInline"
+                                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                                        ClassName="counterEditor"
+                                                        @bind-Value=(contentHolder.content)
+                                                    /> 
+                                                </div></td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                                <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
+                                                @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
+                                                <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
+                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                                <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
+                                                    <Editor
+                                                        Id="@count.ToString()"
+                                                        Inline=false
+                                                        CloudChannel="5"
+                                                        Disable=false
+                                                        Conf="@editorConf"
+                                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                                        ClassName="counterEditor"
+                                                        @bind-Value=(contentHolder.content)
+                                                    /> 
+                                                </div></td>
+                                            </tr>
+                                            @* Initiate localCount here to button onclick events use the count at create time, not when clicked *@
+                                            var localCount = count;
+                                            var localCountAll = countAll;
+                                            <tr>
+                                                <td>
+                                                    @* Spacing *@
+                                                </td>
+                                                @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
+                                                <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
+                                                <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
+                                            </tr>
+                                        }
+                                        @* Increment global count *@
+                                        count++;
+                                    }
+                                    else if (type == contentHolder.page && sections == "all" || type == null )
+                                    {
+                                        @if (type == null)
+                                        {
+                                            type = "Misc (autoselected as missing type)";
+                                        }
+                                        if (inline == true)
+                                        {
+                                            var localCount = count;
+                                            <tr>
+                                                @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                                <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
+                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                                <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
+                                                    <Editor
+                                                        Id="@count.ToString()"
+                                                        Inline=true
+                                                        CloudChannel="5"
+                                                        Disable=false
+                                                        Conf="@editorConfInline"
+                                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                                        ClassName="counterEditor"
+                                                        @bind-Value=(contentHolder.content)
+                                                    /> 
+                                                </div></td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                                <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
+                                                @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
+                                                <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
+                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                                <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
+                                                    <Editor
+                                                        Id="@count.ToString()"
+                                                        Inline=false
+                                                        CloudChannel="5"
+                                                        Disable=false
+                                                        Conf="@editorConf"
+                                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                                        ClassName="counterEditor"
+                                                        @bind-Value=(contentHolder.content)
+                                                    /> 
+                                                </div></td>
+                                            </tr>
+                                            @* Initiate localCount here so button onclick events use the count at create time, not when clicked *@
+                                            var localCount = count;
+                                            var localCountAll = countAll;
+                                            <tr>
+                                                <td>
+                                                    @* Spacing *@
+                                                </td>
+                                                @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
+                                                <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
+                                                <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
+                                            </tr>
+                                        }
+                                        @* Increment global count *@
+                                        count++;
+                                    }
+                                    else if (type == "all")
+                                    {
+                                        @* There is a way to do this so the sections appear in order.  Maybe if the Type in types foreach was outside the main foreach? *@
+                                        @foreach (var Type in types)
+                                        {
+                                            @if ( contentHolder.page == Type )
                                             {
                                                 if (inline == true)
                                                 {
                                                     var localCount = count;
                                                     <tr>
                                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                        <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
+                                                        <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                         @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                        <td><div class="dotted-lines" @onfocusout="(() => Save(localCount, username!))">
+                                                        <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
                                                             <Editor
                                                                 Id="@count.ToString()"
                                                                 Inline=true
@@ -100,9 +232,9 @@
                                                 }
                                                 else
                                                 {
-                                                    <tr>
+                                                        <tr>
                                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                        <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
+                                                        <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                         @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                         <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                         @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -137,305 +269,173 @@
                                                 @* Increment global count *@
                                                 count++;
                                             }
-                                            else if (type == contentHolder.page && sections == "all" || type == null )
+                                        }
+                                    }
+                                    else if (type == "Search")
+                                    {
+                                        if (contentHolder.section!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)  ||  contentHolder.subSection!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || contentHolder.content!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            if (inline == true)
                                             {
-                                                @if (type == null)
-                                                {
-                                                    type = "Misc (autoselected as missing type)";
-                                                }
-                                                if (inline == true)
-                                                {
-                                                    var localCount = count;
-                                                    <tr>
-                                                        @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                        <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
-                                                        @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                        <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
-                                                            <Editor
-                                                                Id="@count.ToString()"
+                                                var localCount = count;
+                                                <tr>
+                                                    @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                                    <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
+                                                    @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                                    <td>
+                                                        <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
+                                                            <Editor Id="@count.ToString()"
                                                                 Inline=true
                                                                 CloudChannel="5"
                                                                 Disable=false
                                                                 Conf="@editorConfInline"
                                                                 ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
                                                                 ClassName="counterEditor"
-                                                                @bind-Value=(contentHolder.content)
-                                                            /> 
-                                                        </div></td>
-                                                    </tr>
-                                                }
-                                                else
-                                                {
-                                                    <tr>
-                                                        @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                        <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
-                                                        @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
-                                                        <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
-                                                        @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                        <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
-                                                            <Editor
-                                                                Id="@count.ToString()"
+                                                                @bind-Value=(contentHolder.content) />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                                    <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
+                                                    @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
+                                                    <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
+                                                    @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                                    <td hidden="@(!IsEditing[count])">
+                                                        <div class="dotted-lines tinymce-editor">
+                                                            <Editor Id="@count.ToString()"
                                                                 Inline=false
                                                                 CloudChannel="5"
                                                                 Disable=false
                                                                 Conf="@editorConf"
                                                                 ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
                                                                 ClassName="counterEditor"
-                                                                @bind-Value=(contentHolder.content)
-                                                            /> 
-                                                        </div></td>
-                                                    </tr>
-                                                    @* Initiate localCount here so button onclick events use the count at create time, not when clicked *@
-                                                    var localCount = count;
-                                                    var localCountAll = countAll;
-                                                    <tr>
-                                                        <td>
-                                                            @* Spacing *@
-                                                        </td>
-                                                        @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
-                                                        <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
-                                                        <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
-                                                        <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
-                                                        <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
-                                                    </tr>
-                                                }
-                                                @* Increment global count *@
-                                                count++;
-                                            }
-                                            else if (type == "all")
-                                            {
-                                                @* There is a way to do this so the sections appear in order.  Maybe if the Type in types foreach was outside the main foreach? *@
-                                                @foreach (var Type in types)
-                                                {
-                                                    @if ( contentHolder.page == Type )
-                                                    {
-                                                        if (inline == true)
-                                                        {
-                                                            var localCount = count;
-                                                            <tr>
-                                                                @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                                <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
-                                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                                <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
-                                                                    <Editor
-                                                                        Id="@count.ToString()"
-                                                                        Inline=true
-                                                                        CloudChannel="5"
-                                                                        Disable=false
-                                                                        Conf="@editorConfInline"
-                                                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
-                                                                        ClassName="counterEditor"
-                                                                        @bind-Value=(contentHolder.content)
-                                                                    /> 
-                                                                </div></td>
-                                                            </tr>
-                                                        }
-                                                        else
-                                                        {
-                                                             <tr>
-                                                                @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                                <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
-                                                                @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
-                                                                <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
-                                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                                <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
-                                                                    <Editor
-                                                                        Id="@count.ToString()"
-                                                                        Inline=false
-                                                                        CloudChannel="5"
-                                                                        Disable=false
-                                                                        Conf="@editorConf"
-                                                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
-                                                                        ClassName="counterEditor"
-                                                                        @bind-Value=(contentHolder.content)
-                                                                    /> 
-                                                                </div></td>
-                                                            </tr>
-                                                            @* Initiate localCount here to button onclick events use the count at create time, not when clicked *@
-                                                            var localCount = count;
-                                                            var localCountAll = countAll;
-                                                            <tr>
-                                                                <td>
-                                                                    @* Spacing *@
-                                                                </td>
-                                                                @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
-                                                                <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
-                                                                <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
-                                                                <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
-                                                                <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
-                                                            </tr>
-                                                        }
-                                                        @* Increment global count *@
-                                                        count++;
-                                                    }
-                                                }
-                                            }
-                                            else if (type == "Search")
-                                            {
-                                                if (contentHolder.section!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || contentHolder.content!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                                                {
-                                                    if (inline == true)
-                                                    {
-                                                        var localCount = count;
-                                                        <tr>
-                                                            @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                            <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
-                                                            @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                            <td>
-                                                                <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
-                                                                    <Editor Id="@count.ToString()"
-                                                                        Inline=true
-                                                                        CloudChannel="5"
-                                                                        Disable=false
-                                                                        Conf="@editorConfInline"
-                                                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
-                                                                        ClassName="counterEditor"
-                                                                        @bind-Value=(contentHolder.content) />
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    }
-                                                    else
-                                                    {
-                                                        <tr>
-                                                            @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                            <td><p>@contentHolder.page: <small class="text-muted">@contentHolder.section</small></p></td>
-                                                            @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
-                                                            <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
-                                                            @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                            <td hidden="@(!IsEditing[count])">
-                                                                <div class="dotted-lines tinymce-editor">
-                                                                    <Editor Id="@count.ToString()"
-                                                                        Inline=false
-                                                                        CloudChannel="5"
-                                                                        Disable=false
-                                                                        Conf="@editorConf"
-                                                                        ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
-                                                                        ClassName="counterEditor"
-                                                                        @bind-Value=(contentHolder.content) />
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                        @* Initiate localCount here to button onclick events use the count at create time, not when clicked *@
-                                                        var localCount = count;
-                                                        var localCountAll = countAll;
-                                                        <tr>
-                                                            <td>
-                                                                @* Spacing *@
-                                                            </td>
-                                                            @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
-                                                            <td>
-                                                                <button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
-                                                                <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
-                                                                <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
-                                                                <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button>
-                                                            </td>
-                                                        </tr>
-                                                    }
-                                                    @* Increment global count *@
-                                                    count++;
-                                                }
-                                            }
-                                        countAll++;
-                                        }
-                                        @if (type == "add" && IsEditing![0] == true)
-                                        {
-                                            if (inline == true)
-                                            {
-                                                count = 0;
+                                                                @bind-Value=(contentHolder.content) />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                @* Initiate localCount here to button onclick events use the count at create time, not when clicked *@
                                                 var localCount = count;
                                                 var localCountAll = countAll;
-                                                <tr>
-                                                    <td>New Section: </td>
-                                                    <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
-                                                        <Editor
-                                                            Id="@count.ToString()"
-                                                            Inline=true
-                                                            CloudChannel="5"
-                                                            Disable=false
-                                                            Conf="@editorConfInline"
-                                                            ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
-                                                            ClassName="counterEditor"
-                                                            @bind-Value=(contentHolderList.Last().content)
-                                                        /> 
-                                                    </div></td>
-                                                </tr>
-                                            }
-                                            else
-                                            {
-                                                var localCount = 0;
-                                                count = 0;
-                                                var localCountAll = countAll;
-                                                <tr>
-                                                    <td>New Section: </td>
-                                                    @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
-                                                    <td hidden="@IsEditing[count]">@(new MarkupString(contentHolderList.Last().content!))</td>
-                                                    <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
-                                                        <Editor
-                                                            Id="@count.ToString()"
-                                                            Inline=false
-                                                            CloudChannel="5"
-                                                            Disable=false
-                                                            Conf="@editorConf"
-                                                            ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
-                                                            ClassName="counterEditor"
-                                                            @bind-Value=(contentHolderList.Last().content)
-                                                        /> 
-                                                    </div></td>
-                                                </tr>
                                                 <tr>
                                                     <td>
                                                         @* Spacing *@
                                                     </td>
                                                     @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
-                                                    <td><button class="btn btn-outline-warning" @onclick="()=>contentHolderList.Last().content = clearText">Clear</button>
-                                                    <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
-                                                    <button class="btn btn-outline-primary" @onclick="(() => CancelNew(localCount))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
+                                                    <td>
+                                                        <button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
+                                                        <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                                        <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
+                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                        <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button>
+                                                    </td>
                                                 </tr>
                                             }
-                                            countAll++;
+                                            @* Increment global count *@
+                                            count++;
                                         }
-                                    </tbody>
-                                </table>
-                            }
-                        </div>
-                    </div>
-                    <div class="col">
-                        @if (type == "add")
-                        {
-                        @* Section for adding a new section from user selection *@
-                        @* Using bootstraps grid layout for formatting *@
-                            <div class="bg-dark text-primary container-fluid">
-                                <div class="row">
-                                    <div class="col-6">
-                                        @* Dropdown for section type *@
-                                        <div class="form-group">
-                                            <label class="form-label bg-dark text-light" for="sectionDropdown">Select New Section Type:</label>
-                                            <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @bind="sectionDropdown">
-                                                <option value="Default" disabled selected>Select a type</option>
-                                                <option value="Hardware">Hardware</option>
-                                                <option value="Software">Software</option>
-                                                <option value="Misc">Misc</option>
-                                            </select>
-                                        </div>
-                                        @* Text field for section name *@
-                                        <div class="form-group bg-dark text-primary">
-                                            <label class="form-label bg-dark text-light mt-1" for="sectionContent">Section Name:</label>
-                                            <input type="text" class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionContent" placeholder="Name of the new section" @bind="sectionName">
-                                        </div>
-                                        @* Add section button *@
-                                        <button class="btn btn-outline-primary mt-2" @onclick="(() => AddNewSection())">Add New Section</button>
-                                    </div>
-                                    <div class="col-6">
-                                        @* Spacing *@
-                                    </div>
+                                    }
+                                countAll++;
+                                }
+                                @if (type == "add" && IsEditing![0] == true)
+                                {
+                                    if (inline == true)
+                                    {
+                                        count = 0;
+                                        var localCount = count;
+                                        var localCountAll = countAll;
+                                        <tr>
+                                            <td>New Section: </td>
+                                            <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
+                                                <Editor
+                                                    Id="@count.ToString()"
+                                                    Inline=true
+                                                    CloudChannel="5"
+                                                    Disable=false
+                                                    Conf="@editorConfInline"
+                                                    ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                                    ClassName="counterEditor"
+                                                    @bind-Value=(contentHolderList.Last().content)
+                                                /> 
+                                            </div></td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        var localCount = 0;
+                                        count = 0;
+                                        var localCountAll = countAll;
+                                        <tr>
+                                            <td>New Section: </td>
+                                            @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
+                                            <td hidden="@IsEditing[count]">@(new MarkupString(contentHolderList.Last().content!))</td>
+                                            <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
+                                                <Editor
+                                                    Id="@count.ToString()"
+                                                    Inline=false
+                                                    CloudChannel="5"
+                                                    Disable=false
+                                                    Conf="@editorConf"
+                                                    ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                                    ClassName="counterEditor"
+                                                    @bind-Value=(contentHolderList.Last().content)
+                                                /> 
+                                            </div></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                @* Spacing *@
+                                            </td>
+                                            @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
+                                            <td><button class="btn btn-outline-warning" @onclick="()=>contentHolderList.Last().content = clearText">Clear</button>
+                                            <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                            <button class="btn btn-outline-primary" @onclick="(() => CancelNew(localCount))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
+                                        </tr>
+                                    }
+                                    countAll++;
+                                }
+                            </tbody>
+                        </table>
+                    }
+                @if (type == "add")
+                {
+                @* Section for adding a new section from user selection *@
+                @* Using bootstraps grid layout for formatting *@
+                    <div class="bg-dark text-primary container-fluid">
+                        <div class="row">
+                            <div class="col-6">
+                                @* Dropdown for section type *@
+                                <div class="form-group">
+                                    <label class="form-label bg-dark text-light" for="sectionDropdown">Select New Section Type:</label>
+                                    <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @bind="sectionDropdown">
+                                        <option value="Default" disabled selected>Select a type</option>
+                                        <option value="Hardware">Hardware</option>
+                                        <option value="Software">Software</option>
+                                        <option value="Misc">Misc</option>
+                                    </select>
                                 </div>
-                            </div>            
-                        }
-                    </div>
+                                @* Text field for section name *@
+                                <div class="form-group bg-dark text-primary">
+                                    <label class="form-label bg-dark text-light mt-1" for="sectionContent">Section Name:</label>
+                                    <input type="text" class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionContent" placeholder="Name of the new section" @bind="sectionName">
+                                </div>
+                                @* Text field for subSection name *@
+                                <div class="form-group bg-dark text-primary">
+                                    <label class="form-label bg-dark text-light mt-1" for="sectionContent">Section Name:</label>
+                                    <input type="text" class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionContent" placeholder="Name of the new section" @bind="subSectionName">
+                                </div>
+                                @* Add section button *@
+                                <button class="btn btn-outline-primary mt-2" @onclick="(() => AddNewSection())">Add New Section</button>
+                            </div>
+                            <div class="col-6">
+                                @* Spacing *@
+                            </div>
+                        </div>
+                    </div>            
+                }
                 </div>
             </div>
         </div>
@@ -455,7 +455,7 @@
     public List<contentHolder> searchResults = new List<contentHolder>();
     public string? searchTerm { get; set; }
     private string[] types = {"Hardware", "Software", "Misc"};
-    
+    private string Logo = "Kudos_logo.png";
     //public contentHolder[] ContentHolderListState;
     @* Declare var for current user selection *@
     [Parameter]
@@ -468,6 +468,7 @@
     private bool[]? IsEditing;
     private string? sectionDropdown;
     private string? sectionName;
+    private string? subSectionName;
     @* Declare/Initialize variables for API communication *@
     private string? repoName = "WikiData";
     private string? userName = "SamDenton";
@@ -491,10 +492,30 @@
         Navigation.LocationChanged += LocationChanged!;
         base.OnInitialized();
     }
-    @* Function to trigger when content is refreshed.  This code is to solve an issue where swtiching between pages and inline editor could leave a section edited, and it would show in the add section page *@
-    protected override void OnAfterRender(bool firstRender)
+    @*Function to force login when first opening *@
+    [Inject]
+    public AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
+    protected override async void OnAfterRender(bool firstRender)
     {
+        if (firstRender)
+        {
+            //Code to execute once
+            await GetAuthenticationState();
+        }
         base.OnAfterRender(firstRender);
+    }
+    private async Task GetAuthenticationState()
+    {
+        var authenticationState = await AuthenticationStateProvider!.GetAuthenticationStateAsync();
+        var user = authenticationState.User;
+        if (user.Identity!.IsAuthenticated)
+        {
+            var username = user.Identity.Name;
+        }
+        else
+        {
+            Navigation.NavigateTo($"/authentication/login");
+        }
     }
     private void LocationChanged(object sender, LocationChangedEventArgs e)
     {
@@ -518,14 +539,14 @@
         {
             if (searchTerm!.Length > 1)
             {
-                Navigation.NavigateTo($"/mainContent/Search");
+                Navigation.NavigateTo($"/Search");
             }
         }
         else
         {
             if (String.IsNullOrWhiteSpace(searchTerm))
             {
-                Navigation.NavigateTo($"/mainContent/all");
+                Navigation.NavigateTo($"/all");
             }
         }
 
@@ -535,10 +556,21 @@
     {
         Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
     }
-    private void navigateToSection(string type, string section)
+
+    @* Might need to make a navtosubSection *@
+    private void navigateToSection(string type, string section, string subSection)
     {
-        Navigation.NavigateTo($"/mainContent/{type}/{section}");
+        if (subSection is not null)
+        {
+            //some code to scroll to an anchor
+        }
+        else
+        {
+            Navigation.NavigateTo($"/{type}/{section}");
+        }
     }
+
+
     @* Method to clear specific sections content *@
     private void ClearContent(int localSectionNo, int globalSectionNo)
     {
@@ -589,13 +621,17 @@
     {
         IsEditing![localSectionNo] = false;
     }
+
+
     @* Add a new object to my array from user input *@
     private void AddNewSection()
     {
     @* Using data binding to tie user selection to these vars *@
         var type = sectionDropdown;
         var name = sectionName;
-        if (!String.IsNullOrWhiteSpace(type) && !String.IsNullOrWhiteSpace(name)) @* type != null && type != "" && type != " " && name != null && name != "" && name != " " *@
+        var subName = subSectionName;
+        if (!String.IsNullOrWhiteSpace(type) && !String.IsNullOrWhiteSpace(name)) 
+    @* type != null && type != "" && type != " " && name != null && name != "" && name != " " *@
         {
     @* Best way to add to an array is to resize then initialize the new index *@
             Array.Resize(ref contentHolderList, contentHolderList!.Length + 1);
@@ -603,6 +639,7 @@
             contentHolderList[contentHolderList.Length - 1] = new contentHolder { 
                 page = type, 
                 section = name, 
+                subSection = subName,
                 content = "<p>Enter some details about " + name + " here.</p>" 
             };
             ReInitialize();
@@ -614,6 +651,8 @@
     @* Should add an alert or style change to the entry box here to show a value is needed *@
         }
     }
+
+
     @* Method to remove selected section *@
     private async Task RemoveSection(int sectionNo)
     {
@@ -719,6 +758,8 @@
         public string? page { get; set; }
 
         public string? section { get; set; }
+
+        public string? subSection { get; set; }
 
         public string? content { get; set; }
     }

@@ -7,97 +7,123 @@
 @using Newtonsoft.Json;
 @inject HttpClient Http;
 
-<div class="ps-3 navbar">
-    <div class="container-fluid">
-        <h4 class=".kudosText">
-            Kudos <small class="text-muted">Internal Wiki</small>
-            <button title="Navigation menu" class="navbar-toggler btn-light" @onclick="ToggleNavMenu">
-                <span class="navbar-toggler-icon">\/</span>
-            </button>
-        </h4>
-    </div>
+<div class="@NavMenuCssClass"> @* Use this if i want an expanding menu that toggles on every click *@
+    
 </div>
 
-<div class="@NavMenuCssClass"> @* Dont think I want this as it will close/open navmenu while trying to use @onclick="ToggleNavMenu"*@
-    <nav class="flex-column text-light">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link text-light" @onclick="(() => resetNav())" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link text-light" @onclick="()=>expandSubNav = !expandSubNav"> @* href="mainContent/Home/Home" *@
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Wiki Content
-            </NavLink>
-        </div>
-        @if (expandSubNav)
-        {
-            <div class="nav-item px-3" @onclick="NavDetectorType">
-                <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @bind="sectionDropdown">
-                    <option value="Default" disabled selected>Select a type</option>
-                    <option value="Hardware"><span class="oi oi-plus" aria-hidden="true"></span>Hardware</option>
-                    <option value="Software"><span class="oi oi-plus" aria-hidden="true"></span>Software</option>
-                    <option value="Misc"><span class="oi oi-plus" aria-hidden="true"></span>Misc</option>
-                </select>
+<div class="@NavMenuCssClass">
+    <nav class="d-flex flex-column text-light navbar-expand-lg">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div>
+            @if (contentHolderList != null)
+            {
+                foreach (var contentHolder in contentHolderList!)
+                {
+                    var type = @contentHolder.page;
+                    var sectionName = @contentHolder.section;
+                    var subSection = @contentHolder.subSection;
+                    var isFirstPage = contentHolder.Equals(contentHolderList.FirstOrDefault(x => x.page == type));
+                    var isFirstSection = contentHolder.Equals(contentHolderList.FirstOrDefault(x => x.section == sectionName));
+                    if (isFirstPage || isFirstSection)
+                    {
+                        if (isFirstPage)
+                        {
+                            <div class="dropdown-divider"></div>
+                            <div class="p-1 nav-item px-3 font-weight-bold"><h3 class="text-muted">@type</h3></div>
+                        }
+                        if (isFirstSection)
+                        {
+                            <NavLink class="p-1 nav-link text-muted text-truncate" @onclick="(() => nav(type!, sectionName!, null))">
+                                <div class="p-1 nav-item px-3 font-weight-bold">&nbsp<h4 class="oi oi-list-rich text-muted text-nowrap"> &nbsp @sectionName</h4></div>
+                            </NavLink>
+                        }
+                    }
+                    <div class="nav-item px-3">
+                        <NavLink class="p-1 nav-link text-muted text-truncate" @onclick="(() => nav(type!, sectionName!, subSection!))"> 
+                            &nbsp&nbsp&nbsp<span class="oi oi-plus text-muted" aria-hidden="true"></span> @contentHolder.subSection
+                        </NavLink>
+                    </div>
+                }
+            }
+            <div class="dropdown-divider"></div>
+            <div class="nav-item px-3 font-weight-bold"><h3>Old Controls</h3></div>
+            <div class="nav-item px-3 font-weight-bold"><h3 class="text-muted">To Be removed or replaced</h3></div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link text-light" @onclick="()=>expandSubNav = !expandSubNav"> @* href="mainContent/Home/Home" *@
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Wiki Content
+                </NavLink>
             </div>
-            @if (sectionDropdown == "Hardware")
+            @if (expandSubNav)
             {
-                <div class="nav-item px-3" @onclick="NavDetector">
-                    <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
-                        <option value="Default" disabled selected>Select a section</option>
-                        <option value="all">All Hardware</option>
-                        @foreach (var contentHolder in contentHolderList!)
-                        {
-                            if (contentHolder.page == "Hardware")
-                            {
-                                <option value="@contentHolder.section" href="mainContent/@contentHolder.page/@contentHolder.section">@contentHolder.section</option>
-                            }
-                        }
+                <div class="nav-item px-3" @onclick="NavDetectorType">
+                    <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @bind="sectionDropdown">
+                        <option value="Default" disabled selected>Select a type</option>
+                        <option value="Hardware"><span class="oi oi-plus" aria-hidden="true"></span>Hardware</option>
+                        <option value="Software"><span class="oi oi-plus" aria-hidden="true"></span>Software</option>
+                        <option value="Misc"><span class="oi oi-plus" aria-hidden="true"></span>Misc</option>
                     </select>
                 </div>
-            }
-            else if (sectionDropdown == "Software")
-            {
-                <div class="nav-item px-3" @onclick="NavDetector">
-                    <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
-                        <option value="Default" disabled selected>Select a section</option>
-                        <option value="all">All Software</option>
-                        @foreach (var contentHolder in contentHolderList!)
-                        {
-                            if (contentHolder.page == "Software")
+                @if (sectionDropdown == "Hardware")
+                {
+                    <div class="nav-item px-3" @onclick="NavDetector">
+                        <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
+                            <option value="Default" disabled selected>Select a section</option>
+                            <option value="all">All Hardware</option>
+                            @foreach (var contentHolder in contentHolderList!)
                             {
-                                <option value="@contentHolder.section" href="mainContent/@contentHolder.page/@contentHolder.section">@contentHolder.section</option>
+                                if (contentHolder.page == "Hardware")
+                                {
+                                    <option value="@contentHolder.section" href="/@contentHolder.page/@contentHolder.section">@contentHolder.section</option>
+                                }
                             }
-                        }
-                    </select>
-                </div>
-            }
-            else if (sectionDropdown == "Misc")
-            {
-                <div class="nav-item px-3" @onclick="NavDetector">
-                    <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
-                        <option value="Default" disabled selected>Select a section</option>
-                        <option value="all">All Misc</option>
-                        @foreach (var contentHolder in contentHolderList!)
-                        {
-                            if (contentHolder.page == "Misc")
+                        </select>
+                    </div>
+                }
+                else if (sectionDropdown == "Software")
+                {
+                    <div class="nav-item px-3" @onclick="NavDetector">
+                        <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
+                            <option value="Default" disabled selected>Select a section</option>
+                            <option value="all">All Software</option>
+                            @foreach (var contentHolder in contentHolderList!)
                             {
-                                <option value="@contentHolder.section" href="mainContent/@contentHolder.page/@contentHolder.section">@contentHolder.section</option>
+                                if (contentHolder.page == "Software")
+                                {
+                                    <option value="@contentHolder.section" href="/@contentHolder.page/@contentHolder.section">@contentHolder.section</option>
+                                }
                             }
-                        }
-                    </select>
-                </div>
+                        </select>
+                    </div>
+                }
+                else if (sectionDropdown == "Misc")
+                {
+                    <div class="nav-item px-3" @onclick="NavDetector">
+                        <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
+                            <option value="Default" disabled selected>Select a section</option>
+                            <option value="all">All Misc</option>
+                            @foreach (var contentHolder in contentHolderList!)
+                            {
+                                if (contentHolder.page == "Misc")
+                                {
+                                    <option value="@contentHolder.section" href="/@contentHolder.page/@contentHolder.section">@contentHolder.section</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                }
             }
-        }
-        <div class="nav-item px-3">
-            <NavLink class="nav-link text-light" href="mainContent/all" @onclick="(() => resetNav())">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> All Sections
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link text-light" href="mainContent/add" @onclick="(() => resetNav())">
-                <span class="oi oi-plus" aria-hidden="true"></span> Add New Section
-            </NavLink>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link text-light" href="/all" @onclick="(() => resetNav())">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> All Sections
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link text-light" href="/add" @onclick="(() => resetNav())">
+                    <span class="oi oi-plus" aria-hidden="true"></span> Add New Section
+                </NavLink>
+            </div>
         </div>
     </nav>
 </div>
@@ -141,21 +167,26 @@
     {
         using (var client = new HttpClient())
         {
-            @* Initialize the HttpClient object with an authorization header and desired content type *@
+    @* Initialize the HttpClient object with an authorization header and desired content type *@
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-            @* Send the GET request to the GitHub API *@
+    @* Send the GET request to the GitHub API *@
             var response = await client.GetAsync($"https://api.github.com/repos/{username}/{repositoryName}/contents/data.json");
-            @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
+    @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
             var content = await response.Content.ReadAsStringAsync();
             var gitContent = JsonConvert.DeserializeObject<Content>(content);
             var contentBytes = Convert.FromBase64String(gitContent!.content!);
             var jsonContent = Encoding.UTF8.GetString(contentBytes);
             var array = JsonConvert.DeserializeObject<T[]>(jsonContent);
-            @* Get the sha of the retrieved file *@ 
+    @* Get the sha of the retrieved file *@ 
             @* newSHA = gitContent.sha; *@
             return array!;
         }
+    }
+
+    private void nav(string page, string section, string subSection)
+    {
+        navigationManager.NavigateTo($"/{page}/{section}");
     }
 
     private void NavDetectorType()
@@ -184,9 +215,9 @@
     {
         // expandSubNav != expandSubNav;
     }
-    private void contentNav(string type, string section)
+    private void contentNav(string page, string section)
     {
-        navigationManager.NavigateTo($"/mainContent/{type}/{section}");
+        navigationManager.NavigateTo($"/{page}/{section}");
     }
     private void ToggleNavMenu()
     {

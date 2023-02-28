@@ -5,7 +5,26 @@ html, body {
 }
 
 .kudosText {
+    /*color: black;*/
     color: #0d1f5b;
+}
+.testClass {
+    color: grey;
+}
+input::-webkit-input-placeholder {
+    color: white;
+}
+
+input::-moz-placeholder {
+    color: white;
+}
+
+input:-ms-input-placeholder {
+    color: white;
+}
+
+input:-moz-placeholder {
+    color: white;
 }
 
 .sticky-offset  {

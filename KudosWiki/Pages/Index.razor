@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/page"
 @inject NavigationManager Navigation;
 
 <head>
@@ -52,6 +52,7 @@
         if (user.Identity!.IsAuthenticated)
         {
             var username = user.Identity.Name;
+            Navigation.NavigateTo($"/mainContent");
         }
         else
         {
