@@ -24,10 +24,6 @@
             </div>
         </div>
         <div class="container-fluid mx-0 ps-0">
-                <div class="ms-1 form-group form-check form-switch">
-                    <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
-                    <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
-                </div>
             <div class="row mx-0 ps-0 gx-3">
                 <div class="col">
                     @if (type != "all" && type != null)
@@ -59,12 +55,16 @@
                     }
                     else
                     {
+                        <div class="ms-1 form-group form-check form-switch">
+                            <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
+                            <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
+                        </div>
                         var count = 0;
                         var countAll = 0;
                         var clearText = "";
                         var username = @context.User.Identity!.Name;
-                        <table class="table rounded @(inline == true ? "table-dark table-bordered" : "table-dark table-striped")"> 
-                            <thead>
+                        <table class="table rounded table-dark @(inline == true ? "table-bordered" : "table-striped")">
+                            <thead class="table-borderless">
                                 <tr>
                                     <th class="col-1"></th>
                                     <th></th>

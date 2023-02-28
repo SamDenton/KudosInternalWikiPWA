@@ -5,6 +5,10 @@
     margin-top: -74px;
 }
 
+input {
+    border-color: #6c757d;
+}
+
 input::-webkit-input-placeholder {
     color: #6c757d;
 }
@@ -34,7 +38,7 @@ input:-moz-placeholder {
 /* Handle */
 ::-webkit-scrollbar-thumb {
     box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    background: #888;
+    background: #6c757d;
 }
 
     /* Handle on hover */
