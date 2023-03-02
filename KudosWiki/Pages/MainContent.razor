@@ -1,21 +1,23 @@
-﻿@page "/{type?}/{sections?}"
-@using System.Net
+﻿@page "/{type?}/{sections?}/{subSections?}"
+@using System.Net;
 @using System.Net.Http;
 @using System.Net.Http.Headers;
 @using Newtonsoft.Json;
 @inject HttpClient Http;
 @inject NavigationManager Navigation;
-@inject MyStateContainer myStateContainer
+@inject MyStateContainer myStateContainer;
+
 @* Using Authorize View to only load content when user is authenticated.  If not logged in, they should be redirected to a Microsoft authenticator *@
+
 <AuthorizeView>
     <Authorized>
         <PageTitle>Wiki</PageTitle>
-        <div class="ps-1 pt-2 sticky-top container-flex" id="searchBar">
+        <div class="ps-1 pt-2 sticky-top container-flex" id="searchBar" style="pointer-events: none;">
             <div class="row">
                 <div class="col-3">
                 </div>
                 <div class="col-5">
-                    <div class="input-group mb-3 text-light">
+                    <div class="input-group mb-3 text-light" style="pointer-events: auto;">
                         <input class="form-control bg-dark text-light" placeholder="Search" @bind="searchTerm" @bind:event="oninput" @onkeyup="SearchTermChanged" >
                     </div>
                 </div>
@@ -26,9 +28,13 @@
         <div class="container-fluid mx-0 ps-0">
             <div class="row mx-0 ps-0 gx-3">
                 <div class="col">
-                    @if (type != "all" && type != null)
+                    @if (type != "all" && type != null && subSections == "all" && type != "Search")
                     {
                         <h1>@type: <small class="text-muted">@sections </small></h1>
+                    }
+                    else if (type != "all" && type != null && subSections != "all" && type != "Search")
+                    {
+                        <h1>@sections: <small class="text-muted">@subSections </small></h1>
                     }
                     @* Show a loading message before API call is complete *@
                     @* Might add a timer so it displays a different message if the request takes too long *@
@@ -74,7 +80,71 @@
                                 @* Pragmatically populate the table using my customer object array *@
                                 @foreach (var contentHolder in contentHolderList)
                                 {
-                                    @if (type == contentHolder.page && sections == contentHolder.section)
+                                    @if (type == contentHolder.page && sections == contentHolder.section && subSections == contentHolder.subSection)
+                                    {
+                                        if (inline == true)
+                                        {
+                                            var localCount = count;
+                                            <tr>
+                                                @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                                <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
+                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                                <td>
+                                                    <div class="dotted-lines" @onfocusout="(() => Save(localCount, username!))">
+                                                        <Editor Id="@count.ToString()"
+                                                Inline=true
+                                                CloudChannel="5"
+                                                Disable=false
+                                                Conf="@editorConfInline"
+                                                ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                                ClassName="counterEditor"
+                                                @bind-Value=(contentHolder.content) />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
+                                                <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
+                                                @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
+                                                <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
+                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
+                                                <td hidden="@(!IsEditing[count])">
+                                                    <div class="dotted-lines tinymce-editor">
+                                                        <Editor Id="@count.ToString()"
+                                                Inline=false
+                                                CloudChannel="5"
+                                                Disable=false
+                                                Conf="@editorConf"
+                                                ApiKey="7so5re0foy5ocvnv7m3m3rznoi0hiar7wrg9w0hk2bkgfshl"
+                                                ClassName="counterEditor"
+                                                @bind-Value=(contentHolder.content) />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            @* Initiate localCount here to button onclick events use the count at create time, not when clicked *@
+                                            var localCount = count;
+                                            var localCountAll = countAll;
+                                            <tr>
+                                                <td>
+                                                    @* Spacing *@
+                                                </td>
+                                                @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
+                                                <td>
+                                                    <button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
+                                                    <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                                    <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
+                                                    <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                    <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                        @* Increment global count *@
+                                        count++;
+                                    }
+                                    @if (type == contentHolder.page && sections == contentHolder.section  && subSections == "all")
                                     {
                                         if (inline == true)
                                         {
@@ -273,8 +343,10 @@
                                     }
                                     else if (type == "Search")
                                     {
+                                        int hasMatch = 0;
                                         if (contentHolder.section!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)  ||  contentHolder.subSection!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || contentHolder.content!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
                                         {
+                                            hasMatch++;
                                             if (inline == true)
                                             {
                                                 var localCount = count;
@@ -336,6 +408,14 @@
                                             }
                                             @* Increment global count *@
                                             count++;
+                                        }
+                                        @if (hasMatch > 0)
+                                        {
+                                            <p>@hasMatch search results</p>
+                                        }
+                                        else
+                                        {
+                                            <p>No results found for: @searchTerm </p>
                                         }
                                     }
                                 countAll++;
@@ -440,7 +520,7 @@
             </div>
         </div>
     </Authorized>
-    <NotAuthorized>
+    <NotAuthorized> 
         @* If user is not authorized, call RedirectHome *@
         <p>Please Login to see this Content.  Redirecting...</p>
         @if(!context.User.Identity!.IsAuthenticated)
@@ -462,6 +542,8 @@
     public string? type { get; set; }
     [Parameter]
     public string? sections { get; set; }
+    [Parameter]
+    public string? subSections { get; set; }
     @* Declare Global Vars *@
     private bool? inline { get; set; } = false;
     private string[]? initialContent;

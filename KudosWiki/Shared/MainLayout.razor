@@ -2,20 +2,22 @@
 
 <div class="page">
 
-    <div class="sidebar">
-        <div class="ps-3 navbar">
-            <div class="container-fluid">
-                <h4 class=".kudosText">
-                    Kudos <small class="text-muted">Internal Wiki</small>
-                </h4>
-            </div>
-        </div>
-        <div class="sidebar overflow-auto" style="height: calc(100vh - 56px);">
+    <div class="sidebar" hidden="@navBarHide">
+        <div class="sidebar overflow-auto" style="height: calc(100vh - 56px); margin-top: 56px;">
             <NavMenu />
         </div>
     </div>
 
-    <main class="bg-dark text-light">
+    <main class="bg-dark text-light" style="position: relative">
+        <div id="topLeftText">
+            <h4>
+                Kudos <small class="text-muted">Internal Wiki</small>
+            </h4>
+        </div> 
+        <div class="form-group form-check form-switch" id="navToggle">
+            <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="navBarHide" />
+            <label class="form-check-label" for="sliderToggle">NavMenu</label>
+        </div>
         <div class="top-row px-4 auth bg-dark text-light">
             <LoginDisplay />
             <a href="https://www.kudos-software.co.uk" target="_blank">Our Website</a>
@@ -26,3 +28,7 @@
         </article>
     </main>
 </div>
+
+@code {
+    private bool navBarHide { get; set; } = false;
+}

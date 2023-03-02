@@ -7,10 +7,6 @@
 @using Newtonsoft.Json;
 @inject HttpClient Http;
 
-<div class="@NavMenuCssClass"> @* Use this if i want an expanding menu that toggles on every click *@
-    
-</div>
-
 <div class="@NavMenuCssClass">
     <nav class="d-flex flex-column text-light navbar-expand-lg">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,6 +17,7 @@
             {
                 foreach (var contentHolder in contentHolderList!)
                 {
+                    var all = "all";
                     var type = @contentHolder.page;
                     var sectionName = @contentHolder.section;
                     var subSection = @contentHolder.subSection;
@@ -31,11 +28,13 @@
                         if (isFirstPage)
                         {
                             <div class="dropdown-divider"></div>
-                            <div class="p-1 nav-item px-3 font-weight-bold"><h3 class="text-muted">@type</h3></div>
+                            <NavLink class="p-1 nav-link text-muted text-truncate" @onclick="(() => nav(type!, all, all))">
+                                <div class="p-1 nav-item px-3 font-weight-bold"><h3 class="text-muted">@type</h3></div>
+                            </NavLink>
                         }
                         if (isFirstSection)
                         {
-                            <NavLink class="p-1 nav-link text-muted text-truncate" @onclick="(() => nav(type!, sectionName!, null))">
+                            <NavLink class="p-1 nav-link text-muted text-truncate" @onclick="(() => nav(type!, sectionName!, all))">
                                 <div class="p-1 nav-item px-3 font-weight-bold">&nbsp<h4 class="oi oi-list-rich text-muted text-nowrap"> &nbsp @sectionName</h4></div>
                             </NavLink>
                         }
@@ -186,7 +185,7 @@
 
     private void nav(string page, string section, string subSection)
     {
-        navigationManager.NavigateTo($"/{page}/{section}");
+        navigationManager.NavigateTo($"/{page}/{section}/{subSection}");
     }
 
     private void NavDetectorType()
