@@ -1,23 +1,29 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-
-    <div class="sidebar" hidden="@navBarHide">
-        <div class="sidebar overflow-auto" style="height: calc(100vh - 56px); margin-top: 56px;">
+    <div class="sidebar @(isChecked == true ? "navHider" : "navShower")" > 
+        @* hidden="@navBarHide"*@
+        <div class="overflow-auto" style="height: calc(100vh - 56px); margin-top: 56px;">
             <NavMenu />
         </div>
     </div>
 
-    <main class="bg-dark text-light" style="position: relative">
-        <div id="topLeftText">
-            <h4>
-                Kudos <small class="text-muted">Internal Wiki</small>
-            </h4>
-        </div> 
-        <div class="form-group form-check form-switch" id="navToggle">
-            <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="navBarHide" />
-            <label class="form-check-label" for="sliderToggle">NavMenu</label>
+    <main class="bg-dark text-light topBlock" style="position: relative">
+        <div class="topLeftBlock">
+            <div class="form-group form-check form-switch" id="navToggle">
+                <label for="sliderToggle" class="form-check-label text-muted">
+                    <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="isChecked" /> @*onclick="@ToggleChanged"*@
+                    <span class="oi oi-menu form-check-icon"></span>
+                </label>
+            </div>
+            <div id="topLeftText">
+                <h4>
+                    <img src="@icon" alt="Company Icon" height="30" width="30" class="mx-2 img-fluid" />Kudos <small class="text-muted">Internal Wiki</small>
+                </h4>
+            </div> 
         </div>
+
+
         <div class="top-row px-4 auth bg-dark text-light">
             <LoginDisplay />
             <a href="https://www.kudos-software.co.uk" target="_blank">Our Website</a>
@@ -31,4 +37,16 @@
 
 @code {
     private bool navBarHide { get; set; } = false;
+    private bool isChecked { get; set; }
+    private string icon = "Kudos_icon.png";
+    @*
+    private async void ToggleChanged()
+    {
+        Console.WriteLine("before");
+        await Task.Delay(300);
+        //navBarHide = !navBarHide;
+        Console.WriteLine("after");
+        StateHasChanged();
+    }
+    *@
 }
