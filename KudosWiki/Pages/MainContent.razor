@@ -28,11 +28,11 @@
         <div class="container-fluid mx-0 ps-0">
             <div class="row mx-0 ps-0 gx-3">
                 <div class="col">
-                    @if (type != "all" && type != null && subSections == "all" && type != "Search")
+                    @if (type != "all" && type != null && subSections == "all" && type != "Search" && type != "add")
                     {
                         <h1>@type: <small class="text-muted">@sections </small></h1>
                     }
-                    else if (type != "all" && type != null && subSections != "all" && type != "Search")
+                    else if (type != "all" && type != null && subSections != "all" && type != "Search" && type != "add")
                     {
                         <h1>@sections: <small class="text-muted">@subSections </small></h1>
                     }
@@ -491,26 +491,43 @@
                             <div class="col-6">
                                 @* Dropdown for section type *@
                                 <div class="form-group">
-                                    <label class="form-label bg-dark text-light" for="sectionDropdown">Select New Section Type:</label>
-                                    <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @bind="sectionDropdown">
+                                    <label class="form-label bg-dark text-light" for="typeDropdown">Select New Section Type:</label>
+                                    <select class="form-control form-control-dark bg-dark text-primary border-primary" id="typeDropdown" @bind="typeDropdown">
                                         <option value="Default" disabled selected>Select a type</option>
-                                        <option value="Hardware">Hardware</option>
-                                        <option value="Software">Software</option>
-                                        <option value="Misc">Misc</option>
+                                            @foreach (var group in contentHolderList.GroupBy(ch => ch.page))
+                                            {
+                                                <option value="@group.First().page">@group.Key</option>
+                                            }
+                                        <option value="Add">Add New</option>
                                     </select>
+                                    @if (typeDropdown == "Add")
+                                    {
+                                        <input type="text" class="form-control form-control-dark bg-dark text-primary border-primary mt-2" placeholder="Enter new type name" @bind="newTypeDropdown" />
+                                    }
                                 </div>
                                 @* Text field for section name *@
-                                <div class="form-group bg-dark text-primary">
-                                    <label class="form-label bg-dark text-light mt-1" for="sectionContent">Section Name:</label>
-                                    <input type="text" class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionContent" placeholder="Name of the new section" @bind="sectionName">
+                                <div class="form-group">
+                                    <label class="form-label bg-dark text-light" for="sectionDropdown">Select New Section Type:</label>
+                                    <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @bind="sectionName">
+                                        <option value="Default" disabled selected>Select a type, then section</option>
+                                            @foreach (var group in contentHolderList.Where(ch => ch.page == typeDropdown).GroupBy(ch => ch.section))
+                                            {
+                                                <option value="@group.First().section">@group.Key</option>
+                                            }
+                                        <option value="Add">Add New</option>
+                                    </select>
+                                        @if (sectionName == "Add")
+                                    {
+                                        <input type="text" class="form-control form-control-dark bg-dark text-primary border-primary mt-2" placeholder="Enter new section name" @bind="newSectionName" />
+                                    }
                                 </div>
                                 @* Text field for subSection name *@
                                 <div class="form-group bg-dark text-primary">
-                                    <label class="form-label bg-dark text-light mt-1" for="sectionContent">Section Name:</label>
-                                    <input type="text" class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionContent" placeholder="Name of the new section" @bind="subSectionName">
+                                    <label class="form-label bg-dark text-light mt-1" for="sectionContent">subSection Name:</label>
+                                    <input type="text" class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionContent" placeholder="Name of the new subSection" @bind="subSectionName">
                                 </div>
                                 @* Add section button *@
-                                <button class="btn btn-outline-primary mt-2" @onclick="(() => AddNewSection())">Add New Section</button>
+                                <button class="btn btn-outline-primary mt-2" @onclick="(() => AddNewSection())">Add New subSection</button>
                             </div>
                             <div class="col-6">
                                 @* Spacing *@
@@ -550,9 +567,11 @@
     private bool? inline { get; set; } = false;
     private string[]? initialContent;
     private bool[]? IsEditing;
-    private string? sectionDropdown;
+    private string? typeDropdown;
+    private string? newTypeDropdown;
     private string? sectionName;
     private string? subSectionName;
+    private string? newSectionName;
     @* Declare/Initialize variables for API communication *@
     private string? repoName = "WikiData";
     private string? userName = "SamDenton";
@@ -710,29 +729,47 @@
     @* Add a new object to my array from user input *@
     private void AddNewSection()
     {
-    @* Using data binding to tie user selection to these vars *@
-        var type = sectionDropdown;
-        var name = sectionName;
-        var subName = subSectionName;
-        if (!String.IsNullOrWhiteSpace(type) && !String.IsNullOrWhiteSpace(name)) 
-    @* type != null && type != "" && type != " " && name != null && name != "" && name != " " *@
+        @* Using data binding to tie user selection to these vars *@
+        string subName = subSectionName;
+        string newType = newTypeDropdown;
+        string newName = newSectionName;
+        string finalType;
+        string finalName;
+        if (typeDropdown == "Add")
         {
-    @* Best way to add to an array is to resize then initialize the new index *@
+            finalType = newTypeDropdown;
+        }
+        else
+        {
+            finalType = typeDropdown;
+        }
+        if (sectionName == "Add")
+        {
+            finalName = newSectionName;
+        }
+        else
+        {
+            finalName = sectionName;
+        }
+        Console.WriteLine(finalType + " " + finalName + " " + subName);
+        if (!String.IsNullOrWhiteSpace(finalType) && !String.IsNullOrWhiteSpace(finalName))
+        {
+            @* Best way to add to an array is to resize then initialize the new index *@
             Array.Resize(ref contentHolderList, contentHolderList!.Length + 1);
             Array.Resize(ref IsEditing, IsEditing!.Length + 1);
             contentHolderList[contentHolderList.Length - 1] = new contentHolder { 
-                page = type, 
-                section = name, 
+                page = finalType,
+                section = finalName,
                 subSection = subName,
-                content = "<p>Enter some details about " + name + " here.</p>" 
+                content = "<p>Enter some details about " + subName + " here.</p>"
             };
             ReInitialize();
-    @* Initialize new index on control variables *@
+            @* Initialize new index on control variables *@
             IsEditing[0] = true;
         }
         else
         {
-    @* Should add an alert or style change to the entry box here to show a value is needed *@
+        @* Should add an alert or style change to the entry box here to show a value is needed *@
         }
     }
 

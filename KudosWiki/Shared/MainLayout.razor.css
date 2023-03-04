@@ -43,34 +43,55 @@ main {
         text-overflow: ellipsis;
     }
 
-@media (max-width: 640.98px) {
+@media (max-width: 689.98px) {
+    .page {
+        flex-direction: row;
+    }
     .top-row:not(.auth) {
         display: none;
     }
-
     .sidebar {
-        display: none;  
-        /*width: 250px;
-        height: 100vh;*/
+        display: none;
         position: sticky;
         top: 0;
         animation: hideNavbar 0.3s ease-in-out forwards;
-        /*transform: translate(-250px, 0px);
-        transition: transform 0.3s ease-in-out;*/
+    }
+    .top-row {
+        position: sticky;
+        top: 0;
     }
     .topLeftBlock {
         display: none;
     }
+    .topBlock {
+        width: calc(100vh - 350px);
+        height: 100%;
+    }
     .top-row.auth {
         justify-content: space-between;
+        margin-left: 0px;
     }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
         margin-left: 0;
     }
 }
-
-@media (min-width: 641px) {
+@media (max-width: 1400px) {
+    .top-row.auth {
+        justify-content: space-between;
+        margin-left: -20px;
+    }
+    .internalWiki {
+        display: none;
+    }
+    /*
+    .top-row {
+        visibility: hidden;
+        width: 100vh;
+    }
+    */
+}
+@media (min-width: 690px) {
     .page {
         flex-direction: row;
     }

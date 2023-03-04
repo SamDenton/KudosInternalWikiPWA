@@ -2,7 +2,6 @@
 
 <div class="page">
     <div class="sidebar @(isChecked == true ? "navHider" : "navShower")" > 
-        @* hidden="@navBarHide"*@
         <div class="overflow-auto" style="height: calc(100vh - 56px); margin-top: 56px;">
             <NavMenu />
         </div>
@@ -12,21 +11,21 @@
         <div class="topLeftBlock">
             <div class="form-group form-check form-switch" id="navToggle">
                 <label for="sliderToggle" class="form-check-label text-muted">
-                    <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="isChecked" /> @*onclick="@ToggleChanged"*@
+                    <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="isChecked" />
                     <span class="oi oi-menu form-check-icon"></span>
                 </label>
             </div>
             <div id="topLeftText">
                 <h4>
-                    <img src="@icon" alt="Company Icon" height="30" width="30" class="mx-2 img-fluid" />Kudos <small class="text-muted">Internal Wiki</small>
+                    <img src="@icon" alt="Company Icon" height="30" width="30" class="mx-2 img-fluid" />Kudos <small class="text-muted internalWiki">Internal Wiki</small>
                 </h4>
             </div> 
         </div>
 
 
         <div class="top-row px-4 auth bg-dark text-light">
-            <LoginDisplay />
-            <a href="https://www.kudos-software.co.uk" target="_blank">Our Website</a>
+                <LoginDisplay />
+            <a class="website" href="https://www.kudos-software.co.uk" target="_blank">Our Website</a>
         </div>
 
         <article class="content px-2 bg-dark text-light">
@@ -39,14 +38,4 @@
     private bool navBarHide { get; set; } = false;
     private bool isChecked { get; set; }
     private string icon = "Kudos_icon.png";
-    @*
-    private async void ToggleChanged()
-    {
-        Console.WriteLine("before");
-        await Task.Delay(300);
-        //navBarHide = !navBarHide;
-        Console.WriteLine("after");
-        StateHasChanged();
-    }
-    *@
 }
