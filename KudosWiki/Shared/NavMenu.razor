@@ -27,20 +27,23 @@
                     var all = "all";
                     var type = typeGroup.Key;
                     <div class="dropdown-divider"></div>
-                    <NavLink class="p-1 nav-link text-muted text-truncate" @onclick="(() => nav(type!, all, all))">
+                    <NavLink class="p-1 nav-link text-muted text-truncate" href=@($"/{type}/all/all")>
+                        @*@onclick="(() => nav(type!, all, all))"*@
                         <div class="p-1 nav-item px-3 font-weight-bold"><h3 class="text-muted">@type</h3></div>
                     </NavLink>
                     foreach (var sectionGroup in typeGroup.GroupBy(c => c.section))
                     {
                         var sectionName = sectionGroup.Key;
-                        <NavLink class="p-1 nav-link text-muted text-truncate" @onclick="(() => nav(type!, sectionName!, all))">
+                        <NavLink class="p-1 nav-link text-muted text-truncate" href=@($"/{type}/{sectionName}/all")>
+                            @*@onclick="(() => nav(type!, sectionName!, all))"*@
                             <div class="p-1 nav-item px-3 font-weight-bold">&nbsp<h4 class="oi oi-list-rich text-muted text-nowrap"> &nbsp @sectionName</h4></div>
                         </NavLink>
                         foreach (var contentHolder in sectionGroup)
                         {
                             <div class="nav-item px-3">
-                                <NavLink class="p-1 nav-link text-muted text-truncate" @onclick="(() => nav(type!, sectionName!, contentHolder.subSection!))">
-                                    &nbsp&nbsp&nbsp<span class="oi oi-plus text-muted" aria-hidden="true"></span> @contentHolder.subSection
+                                <NavLink class="p-1 nav-link text-muted text-truncate" href=@($"/{type}/{sectionName}/{@contentHolder.subSection}")>
+                                    @*@onclick="(() => nav(type!, sectionName!, contentHolder.subSection!))"*@
+                                    &nbsp&nbsp&nbsp<span class="oi oi-minus text-muted" aria-hidden="true"></span> @contentHolder.subSection
                                 </NavLink>
                             </div>
                         }
