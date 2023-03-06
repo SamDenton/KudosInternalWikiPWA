@@ -3,6 +3,7 @@
 @using System.Net.Http;
 @using System.Net.Http.Headers;
 @using Newtonsoft.Json;
+@using System.Timers;
 @inject HttpClient Http;
 @inject NavigationManager Navigation;
 @inject MyStateContainer myStateContainer;
@@ -85,12 +86,13 @@
                                         if (inline == true)
                                         {
                                             var localCount = count;
+                                            var localCountAll = countAll;
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                 <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                 <td>
-                                                    <div class="dotted-lines" @onfocusout="(() => Save(localCount, username!))">
+                                                    <div class="dotted-lines" @onfocusout="(() => Save(localCount, username!, localCountAll))">
                                                         <Editor Id="@count.ToString()"
                                                 Inline=true
                                                 CloudChannel="5"
@@ -134,9 +136,9 @@
                                                 @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                                 <td>
                                                     <button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
-                                                    <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                                    <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                     <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                    <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                    <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
                                                     <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button>
                                                 </td>
                                             </tr>
@@ -149,11 +151,12 @@
                                         if (inline == true)
                                         {
                                             var localCount = count;
+                                            var localCountAll = countAll;
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                 <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                <td><div class="dotted-lines" @onfocusout="(() => Save(localCount, username!))">
+                                                <td><div class="dotted-lines" @onfocusout="(() => Save(localCount, username!, localCountAll))">
                                                     <Editor
                                                         Id="@count.ToString()"
                                                         Inline=true
@@ -197,9 +200,9 @@
                                                 </td>
                                                 @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                                 <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
-                                                <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                                <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                             </tr>
                                         }
@@ -215,11 +218,12 @@
                                         if (inline == true)
                                         {
                                             var localCount = count;
+                                            var localCountAll = countAll;
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                 <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
+                                                <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll))">
                                                     <Editor
                                                         Id="@count.ToString()"
                                                         Inline=true
@@ -263,9 +267,9 @@
                                                 </td>
                                                 @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                                 <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
-                                                <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                                <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                             </tr>
                                         }
@@ -282,11 +286,12 @@
                                                 if (inline == true)
                                                 {
                                                     var localCount = count;
+                                                    var localCountAll = countAll;
                                                     <tr>
                                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                         <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                         @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                        <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
+                                                        <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll))">
                                                             <Editor
                                                                 Id="@count.ToString()"
                                                                 Inline=true
@@ -330,9 +335,9 @@
                                                         </td>
                                                         @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                                         <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
-                                                        <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                                        <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                         <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
                                                         <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                                     </tr>
                                                 }
@@ -350,12 +355,13 @@
                                             if (inline == true)
                                             {
                                                 var localCount = count;
+                                                var localCountAll = countAll;
                                                 <tr>
                                                     @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                     <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                     @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                     <td>
-                                                        <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
+                                                        <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll))">
                                                             <Editor Id="@count.ToString()"
                                                                 Inline=true
                                                                 CloudChannel="5"
@@ -399,9 +405,9 @@
                                                     @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                                     <td>
                                                         <button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
-                                                        <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll))">Delete</button>
+                                                        <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                         <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
                                                         <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button>
                                                     </td>
                                                 </tr>
@@ -431,7 +437,7 @@
                                         var localCountAll = countAll;
                                         <tr>
                                             <td>New Section: </td>
-                                            <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!))">
+                                            <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll))">
                                                 <Editor
                                                     Id="@count.ToString()"
                                                     Inline=true
@@ -473,7 +479,7 @@
                                             </td>
                                             @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                             <td><button class="btn btn-outline-warning" @onclick="()=>contentHolderList.Last().content = clearText">Clear</button>
-                                            <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!))" hidden="@(!IsEditing[localCount])">Save</button>
+                                            <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
                                             <button class="btn btn-outline-primary" @onclick="(() => CancelNew(localCount))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                         </tr>
                                     }
@@ -578,20 +584,22 @@
     private string? token;
     private string? commitText = "Test From Wiki";
     private string? newSHA;
+    private int? updateCount = 0;
     @* Initialize page.  Using Async initialization as I want to load content from API before rendering *@
     protected override async Task OnInitializedAsync()
     {
-    @* Get API token from external file.  Token.txt is not included in Commits.  Should probably do the same with my TinyMCE token *@
+        @* Get API token from external file.  Token.txt is not included in Commits.  Should probably do the same with my TinyMCE token *@
         var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
-    @* Call method to make GET request *@
-        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName!, repoName!, token);
+        @* Call method to make GET request *@
+        await GetContentFromGitHubRepo(userName!, repoName!, token, false);
+        timer();
         myStateContainer.OnStateChange += StateHasChanged;
         //myStateContainer.SetValue();
-    @* Initialize control variables after populating contentHolderList *@
-        initialContent = new string[contentHolderList.Length];
+        @* Initialize control variables after populating contentHolderList *@
+        initialContent = new string[contentHolderList!.Length];
         IsEditing = new bool[contentHolderList.Length];
-    @* Add event handler to nagigation change event to reset IsEditing array *@
+        @* Add event handler to nagigation change event to reset IsEditing array *@
         Navigation.LocationChanged += LocationChanged!;
         base.OnInitialized();
     }
@@ -606,6 +614,18 @@
             await GetAuthenticationState();
         }
         base.OnAfterRender(firstRender);
+    }
+    public void timer()
+    {
+        Timer timer = new Timer(60000); // 60000 milliseconds = 1 minute
+        timer.Elapsed += Timer_Elapsed;
+        timer.Start();
+    }
+
+    private async void Timer_Elapsed(object? sender, ElapsedEventArgs? e)
+    {
+        await GetContentFromGitHubRepo(userName!, repoName!, token!, false);
+        StateHasChanged();
     }
     private async Task GetAuthenticationState()
     {
@@ -673,7 +693,6 @@
         }
     }
 
-
     @* Method to clear specific sections content *@
     private void ClearContent(int localSectionNo, int globalSectionNo)
     {
@@ -682,24 +701,79 @@
         IsEditing![localSectionNo] = true;
     }
     @* Set selected sections IsEditing to True, which should render the editor *@
-    private void Edit(int localSectionNo, int globalSectionNo)
+    private async void Edit(int localSectionNo, int globalSectionNo)
     {
-        Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
-    @* When you click edit, save the current state so 'Cancel' button can revert changes *@
-        initialContent![globalSectionNo] = contentHolderList![globalSectionNo].content!;
-        IsEditing![localSectionNo] = true;
+        string oldSHA = newSHA!;
+        int? oldUpdateCount = updateCount;
+        Console.WriteLine(oldSHA + " " + newSHA);
+        await GetContentFromGitHubRepo(userName!, repoName!, token!, true);
+        EditParser(localSectionNo, globalSectionNo, oldSHA, oldUpdateCount);
+    }
+    @* This function is meant to check if there is changes to content before trying to edit.  Seems unreliable tho *@
+    private void EditParser(int localSectionNo, int globalSectionNo, string oldSHA, int? oldUpdateCount)
+    {
+        if (updateCount == oldUpdateCount + 1)
+        {
+            if (newSHA == oldSHA)
+            {
+                @* When you click edit, save the current state so 'Cancel' button can revert changes *@
+                initialContent![globalSectionNo] = contentHolderList![globalSectionNo].content!;
+                IsEditing![localSectionNo] = true;
+                StateHasChanged();
+            }
+            else
+            {
+                initialContent![globalSectionNo] = contentHolderList![globalSectionNo].content!;
+                IsEditing![localSectionNo] = true;
+                StateHasChanged();
+
+            }
+        }
+        else
+        {
+            Console.WriteLine("Re-triggering edit function");
+            EditParser(localSectionNo, globalSectionNo, oldSHA, oldUpdateCount);
+        }
+        Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo + "editing? " + IsEditing![localSectionNo]);
     }
     @* Set selected section's IsEditing to false, then call method to PUT new JSON to GitHub.  Should render updated content to DOM *@
-    private async void Save(int sectionNo, string username)
+    private async void Save(int sectionNo, string username, int globalSectionNo)
     {
-        IsEditing![sectionNo] = false;
-        commitText = "Content change made by: " + username + "";
-    @* Update the array for navigation *@
-        myStateContainer.SetValue();
-        myStateContainer.OnStateChange += RefreshMe;
-    @* Serialize current object array to a JSON String *@
-        var jsonString = JsonConvert.SerializeObject(contentHolderList);
-        await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
+        string oldSHA = newSHA!;
+        int? oldUpdateCount = updateCount;
+        await GetContentFromGitHubRepo(userName!, repoName!, token!, true);
+        if (updateCount == oldUpdateCount + 1)
+        {
+            if (newSHA == oldSHA)
+            {
+                if (contentHolderList![globalSectionNo].content! != initialContent![globalSectionNo])
+                {
+                    Console.WriteLine("saving");
+                    IsEditing![sectionNo] = false;
+                    commitText = "Content change made by: " + username + "";
+                    @* Update the array for navigation *@
+                    myStateContainer.SetValue();
+                    myStateContainer.OnStateChange += RefreshMe;
+                    @* Serialize current object array to a JSON String *@
+                    var jsonString = JsonConvert.SerializeObject(contentHolderList);
+                    await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
+                    StateHasChanged();
+                }
+                else
+                {
+                    IsEditing![sectionNo] = false;
+                    StateHasChanged();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Unable to save, refresh");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Still Loading");
+        }
     }
     private void RefreshMe()
     {
@@ -716,7 +790,7 @@
         }
         else
         {
-            await RemoveSection(contentHolderList!.Length - 1);
+            await RemoveSection(contentHolderList!.Length - 1, "New Section");
         }
         IsEditing![localSectionNo] = false;
     }
@@ -775,7 +849,7 @@
 
 
     @* Method to remove selected section *@
-    private async Task RemoveSection(int sectionNo)
+    private async Task RemoveSection(int sectionNo, string username)
     {
         if (contentHolderList!.Length > 1)
         {
@@ -794,6 +868,7 @@
             myStateContainer.SetValue();
             myStateContainer.OnStateChange += RefreshMe;
     @* Serialize and upload to GitHub *@
+            commitText = "Section removed by change made by: " + username + "";
             var jsonString = JsonConvert.SerializeObject(contentHolderList);
             await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
         }
@@ -808,10 +883,12 @@
     @* Method for uploading content to GitHub API via PUT *@
     private async Task UpdateJSONOnGitHub(string jsonString, string repositoryName, string username, string token, string commitMessage, string sha)
     {
-    @* Since I'm injecting a Http client for Token GET I dont know if i need to declare new clients for each method, but its working *@
+        //await GetContentFromGitHubRepo(username, repositoryName, token);
+        @* Since I'm injecting a Http client for Token GET I dont know if i need to declare new clients for each method, but its working *@
         using (var client = new HttpClient())
         {
-    @* Initialize the HttpClient object with an authorization header and desired content type *@
+            Console.WriteLine("Saving2");
+            @* Initialize the HttpClient object with an authorization header and desired content type *@
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
     @* Define the request body, encoding the content string as base64 *@
@@ -830,12 +907,13 @@
     @* Get new sha value from PUT response headers *@
             var gitContent = JsonConvert.DeserializeObject<Root>(responceHeaders);
             newSHA = gitContent!.content!.sha!;
-    @* Ensure the request was successful *@
+            Console.WriteLine("newnewSHA: " + newSHA);
+            @* Ensure the request was successful *@
             response.EnsureSuccessStatusCode();
         }
     }
     @* Retrieve content from GitHub as a JSON string *@
-    public async Task<T[]> GetContentFromGitHubRepo<T>(string username, string repositoryName, string token)
+    public async Task GetContentFromGitHubRepo(string username, string repositoryName, string token, bool checking)
     {
         using (var client = new HttpClient())
         {
@@ -844,16 +922,22 @@
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
     @* Send the GET request to the GitHub API *@
             var response = await client.GetAsync($"https://api.github.com/repos/{username}/{repositoryName}/contents/data.json");
-    @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
+            @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
             var content = await response.Content.ReadAsStringAsync();
             var gitContent = JsonConvert.DeserializeObject<Content>(content);
             var contentBytes = Convert.FromBase64String(gitContent!.content!);
             var jsonContent = Encoding.UTF8.GetString(contentBytes);
-            var array = JsonConvert.DeserializeObject<T[]>(jsonContent);
-    @* Get the sha of the retrieved file *@ 
+            var array = JsonConvert.DeserializeObject<contentHolder[]>(jsonContent);
+            @* Get the sha of the retrieved file *@
+            Console.WriteLine("oldSHA: " + newSHA);
             newSHA = gitContent.sha!;
-    @* Not using this return.  I might be able to remove the return type <T[]> from the method deceleration *@
-            return array!;
+            Console.WriteLine("newSHA: " + newSHA);
+            if (checking != true)
+            {
+                contentHolderList = array!;
+            }
+            StateHasChanged();
+            updateCount++;
         }
     }
     @* Not using this method currently, but might be useful if I split content across pages / files on GitHub *@
