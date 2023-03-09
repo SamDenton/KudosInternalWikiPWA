@@ -157,13 +157,13 @@
     {
         var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
-        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
+        await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
         myStateContainer.OnStateChange += RefreshMe;
     }
     private async void RefreshMe()
     {
         await Task.Delay(1000);
-        contentHolderList = await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
+        await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
         Console.WriteLine(contentHolderList.Last().section);
         StateHasChanged();
     }
@@ -174,24 +174,31 @@
         sectionDropdown2 = "Default";
     }
     @* Retrieve content from GitHub as a JSON string *@
-    public async Task<T[]> GetContentFromGitHubRepo<T>(string username, string repositoryName, string token)
+    public async Task GetContentFromGitHubRepo<T>(string username, string repositoryName, string token)
     {
         using (var client = new HttpClient())
         {
     @* Initialize the HttpClient object with an authorization header and desired content type *@
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-    @* Send the GET request to the GitHub API *@
+            @* Send the GET request to the GitHub API *@
             var response = await client.GetAsync($"https://api.github.com/repos/{username}/{repositoryName}/contents/data.json");
-    @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
-            var content = await response.Content.ReadAsStringAsync();
-            var gitContent = JsonConvert.DeserializeObject<Content>(content);
-            var contentBytes = Convert.FromBase64String(gitContent!.content!);
-            var jsonContent = Encoding.UTF8.GetString(contentBytes);
-            var array = JsonConvert.DeserializeObject<T[]>(jsonContent);
-    @* Get the sha of the retrieved file *@ 
-            @* newSHA = gitContent.sha; *@
-            return array!;
+            try
+            {
+                @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
+                var content = await response.Content.ReadAsStringAsync();
+                var gitContent = JsonConvert.DeserializeObject<Content>(content);
+                var contentBytes = Convert.FromBase64String(gitContent!.content!);
+                var jsonContent = Encoding.UTF8.GetString(contentBytes);
+                var array = JsonConvert.DeserializeObject<contentHolder[]>(jsonContent);
+                contentHolderList = array;
+                @* Get the sha of the retrieved file *@
+                @* newSHA = gitContent.sha; *@
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
         }
     }
 

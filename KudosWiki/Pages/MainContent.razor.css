@@ -1,6 +1,25 @@
 ﻿body {
 }
 
+.kudosText {
+    /*color: black;*/
+    color: #1c5380;
+    padding-top: 50px;
+}
+
+    .kudosText .text-muted {
+        color: #0d385b !important;
+    }
+
+.kudosTextTop {
+    /*color: black;*/
+    color: #1c5380;
+}
+
+    .kudosTextTop .text-muted {
+        color: #0d385b !important;
+    }
+
 #searchBar {
     margin-top: -74px;
 }
