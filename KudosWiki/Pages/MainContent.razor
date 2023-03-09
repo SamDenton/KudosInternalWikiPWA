@@ -7,6 +7,7 @@
 @inject HttpClient Http;
 @inject NavigationManager Navigation;
 @inject MyStateContainer myStateContainer;
+@inject IJSRuntime JSRuntime
 
 @* Using Authorize View to only load content when user is authenticated.  If not logged in, they should be redirected to a Microsoft authenticator *@
 
@@ -310,7 +311,7 @@
                                                 }
                                                 else
                                                 {
-                                                        <tr>
+                                                    <tr>
                                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                         <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                         @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
@@ -560,6 +561,8 @@
 @code {
     @* Declare custom object array *@
     public contentHolder[]? contentHolderList;
+    public contentHolder[]? tempContentHolderList;
+    public string? tempContentSection;
     public List<contentHolder> searchResults = new List<contentHolder>();
     public string? searchTerm { get; set; }
     private string[] types = {"Hardware", "Software", "Misc"};
@@ -631,7 +634,24 @@
         await GetContentFromGitHubRepo(userName!, repoName!, token!, true);
         if (oldSHATimed != newSHA)
         {
-            //ask the user if they want to update to new content or overwrite changes
+            if (IsEditing!.All(x => x == false))
+            {
+                contentHolderList = tempContentHolderList;
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Content is out of date with database, refreshing");
+                for (int i = 0; i < IsEditing!.Length; i++)
+                {
+                    if (IsEditing[i] == true)
+                    {
+                        tempContentSection = contentHolderList[i].content;
+                        contentHolderList = tempContentHolderList;
+                        contentHolderList[i].content = tempContentSection;
+                        break;
+                    }
+                }
+            }
         }
         StateHasChanged();
     }
@@ -654,7 +674,7 @@
     }
     private void ClearIsEditingArray()
     {
-                if (IsEditing != null)
+        if (IsEditing != null)
         {
             for (int i = 0; i < IsEditing!.Length; i++)
             {
@@ -713,6 +733,7 @@
     {
         string oldSHA = newSHA!;
         int? oldUpdateCount = updateCount;
+        ClearIsEditingArray();
         Console.WriteLine(oldSHA + " " + newSHA);
         await GetContentFromGitHubRepo(userName!, repoName!, token!, true);
         EditParser(localSectionNo, globalSectionNo, oldSHA, oldUpdateCount);
@@ -727,13 +748,13 @@
                 @* When you click edit, save the current state so 'Cancel' button can revert changes *@
                 initialContent![globalSectionNo] = contentHolderList![globalSectionNo].content!;
                 IsEditing![localSectionNo] = true;
-                StateHasChanged();
             }
             else
             {
-                initialContent![globalSectionNo] = contentHolderList![globalSectionNo].content!;
+                JSRuntime.InvokeVoidAsync("alert", "Content is out of date with database, refreshing");
+                initialContent![globalSectionNo] = tempContentHolderList![globalSectionNo].content!;
+                contentHolderList = tempContentHolderList;
                 IsEditing![localSectionNo] = true;
-                StateHasChanged();
 
             }
         }
@@ -742,6 +763,7 @@
             Console.WriteLine("Re-triggering edit function");
             EditParser(localSectionNo, globalSectionNo, oldSHA, oldUpdateCount);
         }
+        StateHasChanged();
         Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo + "editing? " + IsEditing![localSectionNo]);
     }
     @* Set selected section's IsEditing to false, then call method to PUT new JSON to GitHub.  Should render updated content to DOM *@
@@ -765,7 +787,6 @@
                     @* Serialize current object array to a JSON String *@
                     var jsonString = JsonConvert.SerializeObject(contentHolderList);
                     await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
-                    StateHasChanged();
                 }
                 else
                 {
@@ -780,26 +801,33 @@
                         @* Serialize current object array to a JSON String *@
                         var jsonString = JsonConvert.SerializeObject(contentHolderList);
                         await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
-                        StateHasChanged();
                     }
                     else
                     {
                         IsEditing![sectionNo] = false;
-                        StateHasChanged();
                     }
                 }
             }
             else
             {
-                Console.WriteLine("Content updated on database, do you want to refresh or overwrite database changes?");
-                //Could as the customer if they want to keep their changes after updating main content array.
-                //Could save the users changes in a temp var and ask if they want to keep and upload their changes after refresh. Maybe have a popup that shows the DB changes and Users current changes
+                await JSRuntime.InvokeVoidAsync("alert", "Content is out of date with database, please press save again to force changes or cancel to update to database version");
+                for (int i = 0; i < IsEditing!.Length; i++)
+                {
+                    if (IsEditing[i] == true)
+                    {
+                        tempContentSection = contentHolderList[i].content;
+                        contentHolderList = tempContentHolderList;
+                        contentHolderList[i].content = tempContentSection;
+                        break;
+                    }
+                }
             }
         }
         else
         {
             Console.WriteLine("Still Loading");
         }
+        StateHasChanged();
     }
     private void RefreshMe()
     {
@@ -964,7 +992,7 @@
             }
             else
             {
-                //tempContentHolderList = array!; //should store the result of this call in a temp array, and ask user if they want to switch to latest content.
+                tempContentHolderList = array!; //should store the result of this call in a temp array, and ask user if they want to switch to latest content.
             }
             StateHasChanged();
             updateCount++;
