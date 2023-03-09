@@ -92,7 +92,7 @@
                                                 <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                 <td>
-                                                    <div class="dotted-lines" @onfocusout="(() => Save(localCount, username!, localCountAll))">
+                                                    <div class="dotted-lines" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                         <Editor Id="@count.ToString()"
                                                 Inline=true
                                                 CloudChannel="5"
@@ -138,7 +138,7 @@
                                                     <button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                     <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                     <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                    <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                    <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll, false))" hidden="@(!IsEditing[localCount])">Save</button>
                                                     <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button>
                                                 </td>
                                             </tr>
@@ -156,7 +156,8 @@
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                 <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                <td><div class="dotted-lines" @onfocusout="(() => Save(localCount, username!, localCountAll))">
+                                                <td>
+                                                    <div class="dotted-lines" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                     <Editor
                                                         Id="@count.ToString()"
                                                         Inline=true
@@ -202,7 +203,7 @@
                                                 <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                 <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                    <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll, false))" hidden="@(!IsEditing[localCount])">Save</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                             </tr>
                                         }
@@ -223,7 +224,8 @@
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                 <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll))">
+                                                <td>
+                                                    <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                     <Editor
                                                         Id="@count.ToString()"
                                                         Inline=true
@@ -269,7 +271,7 @@
                                                 <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                 <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll, false))" hidden="@(!IsEditing[localCount])">Save</button>
                                                 <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                             </tr>
                                         }
@@ -291,7 +293,8 @@
                                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                         <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                         @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
-                                                        <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll))">
+                                                        <td>
+                                                            <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                             <Editor
                                                                 Id="@count.ToString()"
                                                                 Inline=true
@@ -337,7 +340,7 @@
                                                         <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                         <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                         <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll, false))" hidden="@(!IsEditing[localCount])">Save</button>
                                                         <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                                     </tr>
                                                 }
@@ -361,7 +364,7 @@
                                                     <td><p>@contentHolder.section: <small class="text-muted">@contentHolder.subSection</small></p></td>
                                                     @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                     <td>
-                                                        <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll))">
+                                                        <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                             <Editor Id="@count.ToString()"
                                                                 Inline=true
                                                                 CloudChannel="5"
@@ -407,7 +410,7 @@
                                                         <button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                         <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                         <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
-                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
+                                                        <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll, false))" hidden="@(!IsEditing[localCount])">Save</button>
                                                         <button class="btn btn-outline-primary" @onclick="(() => Cancel(localCount, localCountAll))" hidden="@(!IsEditing[localCount])">Cancel</button>
                                                     </td>
                                                 </tr>
@@ -437,7 +440,7 @@
                                         var localCountAll = countAll;
                                         <tr>
                                             <td>New Section: </td>
-                                            <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll))">
+                                            <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, true))">
                                                 <Editor
                                                     Id="@count.ToString()"
                                                     Inline=true
@@ -479,7 +482,7 @@
                                             </td>
                                             @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                             <td><button class="btn btn-outline-warning" @onclick="()=>contentHolderList.Last().content = clearText">Clear</button>
-                                            <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll))" hidden="@(!IsEditing[localCount])">Save</button>
+                                            <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll, true))" hidden="@(!IsEditing[localCount])">Save</button>
                                             <button class="btn btn-outline-primary" @onclick="(() => CancelNew(localCount))" hidden="@(!IsEditing[localCount])">Cancel</button></td>
                                         </tr>
                                     }
@@ -625,7 +628,7 @@
     private async void Timer_Elapsed(object? sender, ElapsedEventArgs? e)
     {
         string oldSHATimed = newSHA;
-        await GetContentFromGitHubRepo(userName!, repoName!, token!, false);
+        await GetContentFromGitHubRepo(userName!, repoName!, token!, true);
         if (oldSHATimed != newSHA)
         {
             //ask the user if they want to update to new content or overwrite changes
@@ -742,7 +745,7 @@
         Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo + "editing? " + IsEditing![localSectionNo]);
     }
     @* Set selected section's IsEditing to false, then call method to PUT new JSON to GitHub.  Should render updated content to DOM *@
-    private async void Save(int sectionNo, string username, int globalSectionNo)
+    private async void Save(int sectionNo, string username, int globalSectionNo, bool newSec)
     {
         string oldSHA = newSHA!;
         int? oldUpdateCount = updateCount;
@@ -751,7 +754,7 @@
         {
             if (newSHA == oldSHA)
             {
-                if (contentHolderList![globalSectionNo].content! != initialContent![globalSectionNo])
+                if (newSec == true)
                 {
                     Console.WriteLine("saving");
                     IsEditing![sectionNo] = false;
@@ -766,8 +769,24 @@
                 }
                 else
                 {
-                    IsEditing![sectionNo] = false;
-                    StateHasChanged();
+                    if (contentHolderList![globalSectionNo].content! != initialContent!.ElementAtOrDefault(globalSectionNo))
+                    {
+                        Console.WriteLine("saving");
+                        IsEditing![sectionNo] = false;
+                        commitText = "Content change made by: " + username + "";
+                        @* Update the array for navigation *@
+                        myStateContainer.SetValue();
+                        myStateContainer.OnStateChange += RefreshMe;
+                        @* Serialize current object array to a JSON String *@
+                        var jsonString = JsonConvert.SerializeObject(contentHolderList);
+                        await UpdateJSONOnGitHub(jsonString, repoName!, userName!, token!, commitText!, newSHA!);
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        IsEditing![sectionNo] = false;
+                        StateHasChanged();
+                    }
                 }
             }
             else
