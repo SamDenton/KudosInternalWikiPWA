@@ -44,8 +44,4 @@
         }
     });
 }
-icon.classList.remove('rotateRight');
-icon.classList.add('rotateLeft');
-
-icon.classList.remove('rotateLeft');
-icon.classList.add('rotateRight');
+       

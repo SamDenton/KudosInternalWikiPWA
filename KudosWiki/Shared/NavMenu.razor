@@ -6,8 +6,9 @@
 @using System.Net.Http.Headers;
 @using Newtonsoft.Json;
 @inject HttpClient Http;
+@inject IJSRuntime JSRuntime
 
-<div class="@NavMenuCssClass">
+<div>
     <nav class="d-flex flex-column text-light navbar-expand-lg">
         @* Should looks to replace this on mainlayout component *@
         @*
@@ -18,35 +19,43 @@
         <div>
             @if (contentHolderList != null)
             {
+                var count = 0;
                 @foreach (var typeGroup in contentHolderList
-               .OrderBy(c => c.page)
-               .ThenBy(c => c.section)
-               .ThenBy(c => c.subSection)
-               .GroupBy(c => c.page))
+                             .OrderBy(c => c.page)
+                             .ThenBy(c => c.section)
+                             .ThenBy(c => c.subSection)
+                             .GroupBy(c => c.page))
                 {
-                    var all = "all";
                     var type = typeGroup.Key;
                     <div class="dropdown-divider"></div>
-                    <NavLink class="p-1 nav-link text-muted text-truncate" href=@($"/{type}/all/all")>
-                        @*@onclick="(() => nav(type!, all, all))"*@
-                        <div class="p-1 nav-item px-3 font-weight-bold"><h3 class="text-muted">@type</h3></div>
-                    </NavLink>
-                    foreach (var sectionGroup in typeGroup.GroupBy(c => c.section))
-                    {
-                        var sectionName = sectionGroup.Key;
-                        <NavLink class="p-1 nav-link text-muted text-truncate" href=@($"/{type}/{sectionName}/all")>
-                            @*@onclick="(() => nav(type!, sectionName!, all))"*@
-                            <div class="p-1 nav-item px-3 font-weight-bold">&nbsp<h4 class="oi oi-list-rich text-muted text-nowrap"> &nbsp @sectionName</h4></div>
+                    <div class="p-1 nav-item px-3 font-weight-bold" @onclick="(() => { Array.Fill(showSubSections, false); })">
+                        <NavLink class="p-1 nav-link text-muted" href=@($"/{type}/all/all")>
+                            <h2 class="oi oi-list-rich text-muted text-truncate typeText" style="width:100%;"> &nbsp @type</h2>
                         </NavLink>
-                        foreach (var contentHolder in sectionGroup)
-                        {
-                            <div class="nav-item px-3">
-                                <NavLink class="p-1 nav-link text-muted text-truncate" href=@($"/{type}/{sectionName}/{@contentHolder.subSection}")>
-                                    @*@onclick="(() => nav(type!, sectionName!, contentHolder.subSection!))"*@
-                                    &nbsp&nbsp&nbsp<span class="oi oi-minus text-muted" aria-hidden="true"></span> @contentHolder.subSection
+                    </div>
+                    @foreach (var sectionGroup in typeGroup.GroupBy(c => c.section))
+                    {
+                        var localCount = count;
+                        var sectionName = sectionGroup.Key;
+                        <div class="navSubContainer @(showSubSections[localCount] == true ? "show" : "hide")">
+                            <div class="p-1 nav-item px-3 font-weight-bold" @onclick="(() => { Array.Fill(showSubSections, false, 0, localCount); showSubSections[localCount] = !showSubSections[localCount]; Array.Fill(showSubSections, false, localCount+1, showSubSections.Length-localCount-1); StateHasChanged(); Console.WriteLine(showSubSections[localCount]); } )">
+                                <NavLink class="p-1 nav-link text-muted" href=@($"/{type}/{sectionName}/all")>
+                                    <h3 class="oi text-muted text-nowrap text-truncate @(showSubSections[localCount] == true ? "oi-caret-bottom" : "oi-caret-right")" style="width:100%;"> &nbsp @sectionName</h3> @*@(showSubSections[localCount] == true ? "oi-plus" : "oi-minus"*@
                                 </NavLink>
                             </div>
-                        }
+                            @if (showSubSections[localCount])
+                            {
+                                @foreach (var contentHolder in sectionGroup)
+                                {
+                                    <div class="nav-item px-3">
+                                        <NavLink class="nav-link text-muted" href=@($"/{type}/{sectionName}/{contentHolder.subSection}")>
+                                            <h4 class="oi oi-minus text-muted text-truncate" aria-hidden="true" style="width:100%;"> &nbsp @contentHolder.subSection </h4>
+                                        </NavLink>
+                                    </div>
+                                }
+                            }
+                        </div>
+                        count++;
                     }
                 }
             }
@@ -59,96 +68,24 @@
                 </div>
             }
             <div class="dropdown-divider"></div>
-            @*<div class="nav-item px-3 font-weight-bold"><h3>Old Controls</h3></div>
-            <div class="nav-item px-3 font-weight-bold"><h3 class="text-muted">To Be removed or replaced</h3></div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link text-light" @onclick="()=>expandSubNav = !expandSubNav"> @* href="mainContent/Home/Home" 
-                    <span class="oi oi-list-rich" aria-hidden="true"></span> Wiki Content
-                </NavLink>
-            </div>
-            @if (expandSubNav)
-            {
-                <div class="nav-item px-3" @onclick="NavDetectorType">
-                    <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @bind="sectionDropdown">
-                        <option value="Default" disabled selected>Select a type</option>
-                        <option value="Hardware"><span class="oi oi-plus" aria-hidden="true"></span>Hardware</option>
-                        <option value="Software"><span class="oi oi-plus" aria-hidden="true"></span>Software</option>
-                        <option value="Misc"><span class="oi oi-plus" aria-hidden="true"></span>Misc</option>
-                    </select>
-                </div>
-                @if (sectionDropdown == "Hardware")
-                {
-                    <div class="nav-item px-3" @onclick="NavDetector">
-                        <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
-                            <option value="Default" disabled selected>Select a section</option>
-                            <option value="all">All Hardware</option>
-                            @foreach (var contentHolder in contentHolderList!)
-                            {
-                                if (contentHolder.page == "Hardware")
-                                {
-                                    <option value="@contentHolder.section" href="/@contentHolder.page/@contentHolder.section">@contentHolder.section</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                }
-                else if (sectionDropdown == "Software")
-                {
-                    <div class="nav-item px-3" @onclick="NavDetector">
-                        <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
-                            <option value="Default" disabled selected>Select a section</option>
-                            <option value="all">All Software</option>
-                            @foreach (var contentHolder in contentHolderList!)
-                            {
-                                if (contentHolder.page == "Software")
-                                {
-                                    <option value="@contentHolder.section" href="/@contentHolder.page/@contentHolder.section">@contentHolder.section</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                }
-                else if (sectionDropdown == "Misc")
-                {
-                    <div class="nav-item px-3" @onclick="NavDetector">
-                        <select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown2" @bind="sectionDropdown2">
-                            <option value="Default" disabled selected>Select a section</option>
-                            <option value="all">All Misc</option>
-                            @foreach (var contentHolder in contentHolderList!)
-                            {
-                                if (contentHolder.page == "Misc")
-                                {
-                                    <option value="@contentHolder.section" href="/@contentHolder.page/@contentHolder.section">@contentHolder.section</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                }
-            }*@
-            <div class="nav-item px-3">
-                <NavLink class="nav-link text-light text-muted" href="/all" @onclick="(() => resetNav())">
+                <NavLink class="nav-link text-light text-muted" href="/all" @onclick="(() => Array.Fill(showSubSections, false))">
                     <span class="oi oi-list-rich" aria-hidden="true"></span> All Sections
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link text-light text-muted" href="/add" @onclick="(() => resetNav())">
+                <NavLink class="nav-link text-light text-muted" href="/add" @onclick="(() => Array.Fill(showSubSections, false))">
                     <span class="oi oi-plus" aria-hidden="true"></span> Add New Section
                 </NavLink>
             </div>
         </div>
     </nav>
 </div>
-@* Need to add code to detect changing page and colapsing menu *@
-@code {
 
+@code {
     private contentHolder[]? contentHolderList;
 
-    private bool collapseNavMenu = true;
-
-    private string? sectionDropdown;
-    private string? sectionDropdown2;
-    private bool expandSubNav;
-    private string? NavMenuCssClass => !collapseNavMenu ? "collapse" : null;
+    private bool[]? showSubSections;
     private string repoName = "WikiData";
     private string userName = "SamDenton";
     private string? token;
@@ -159,19 +96,24 @@
         token = await getFromTokens.Content.ReadAsStringAsync();
         await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
         myStateContainer.OnStateChange += RefreshMe;
+        var uniqueSectionsCount = contentHolderList.GroupBy(x => x.section).Count();
+        Array.Resize(ref showSubSections, uniqueSectionsCount);
+        Array.Fill(showSubSections, false);
     }
+
+    [JSInvokable]
+    public async void ToggleNavSection(int index)
+    {
+        await JSRuntime.InvokeVoidAsync("toggleNavSection", index);
+        Console.WriteLine("Called from C#");
+    }
+
     private async void RefreshMe()
     {
         await Task.Delay(1000);
         await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
         Console.WriteLine(contentHolderList.Last().section);
         StateHasChanged();
-    }
-    public void resetNav()
-    {
-        expandSubNav = false;
-        sectionDropdown = "Default";
-        sectionDropdown2 = "Default";
     }
     @* Retrieve content from GitHub as a JSON string *@
     public async Task GetContentFromGitHubRepo<T>(string username, string repositoryName, string token)
@@ -205,40 +147,5 @@
     private void nav(string page, string section, string subSection)
     {
         navigationManager.NavigateTo($"/{page}/{section}/{subSection}");
-    }
-
-    private void NavDetectorType()
-    {
-        StateHasChanged();
-        if (sectionDropdown2 != null && sectionDropdown2 != "")
-        {
-            sectionDropdown2 = "Default";
-        }
-    }
-
-    private void NavDetector()
-    {
-        if (!String.IsNullOrWhiteSpace(sectionDropdown2) && sectionDropdown2 != "Default")
-        {
-            foreach (var contentHolder in contentHolderList!)
-            {
-                Console.WriteLine("Current section list: " + contentHolder.section);
-            }
-            Console.WriteLine(sectionDropdown!, sectionDropdown2);
-            contentNav(sectionDropdown!, sectionDropdown2);
-        }
-    }
-
-    private void expandSubNavInvert()
-    {
-        // expandSubNav != expandSubNav;
-    }
-    private void contentNav(string page, string section)
-    {
-        navigationManager.NavigateTo($"/{page}/{section}");
-    }
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
     }
 }

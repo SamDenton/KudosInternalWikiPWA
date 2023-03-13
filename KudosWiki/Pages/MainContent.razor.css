@@ -4,20 +4,49 @@
 .kudosText {
     /*color: black;*/
     color: #1c5380;
-    padding-top: 50px;
 }
 
     .kudosText .text-muted {
         color: #0d385b !important;
     }
 
+.kudosTextInline {
+    /*color: black;*/
+    color: #1c5380;
+    padding-top: 40px;
+}
+
+    .kudosTextInline .text-muted {
+        color: #0d385b !important;
+    }
+
 .kudosTextTop {
     /*color: black;*/
     color: #1c5380;
+    margin-top: -10px;
+    margin-bottom: 15px;
 }
 
     .kudosTextTop .text-muted {
         color: #0d385b !important;
+    }
+
+.kudosTextToggle {
+    display: flex;
+    margin-top: 5px;
+    align-items: center;
+    justify-content: flex-end;
+    color: #0d385b !important;
+}
+
+    .kudosTextToggle label {
+        margin-right: 50px;
+        padding-top: 0px;
+    }
+
+    .kudosTextToggle .inputCheck {
+        margin-right: 0px;
+        padding-top: 0px;
     }
 
 #searchBar {

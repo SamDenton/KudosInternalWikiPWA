@@ -7,8 +7,47 @@
     background-color: rgba(0,0,0,0.4);
 }
 
+.typeText {
+    font-size: xx-large!important;
+}
+
 .navbar-brand {
     font-size: 1.1rem;
+}
+
+.navSubContainer {
+    border: none;
+    padding: 0;
+    margin: 0.25rem;
+    border-radius: 5px;
+}
+
+.hide {
+    animation: hideSubContiner 0.3s ease-in-out forwards;
+}
+
+.show {
+    animation: showSubContiner 0.3s ease-in-out forwards;
+}
+
+@keyframes hideSubContiner {
+    0% {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    100% {
+        background-color: rgba(0, 0, 0, 0);
+    }
+}
+
+@keyframes showSubContiner {
+    0% {
+        background-color: rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
 }
 
 .oi {

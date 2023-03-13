@@ -30,52 +30,35 @@
         <div class="container-fluid mx-0 ps-0">
             <div class="row mx-0 ps-0 gx-3">
                 <div class="col">
+                    @if (type != null)
+                    {
+                        <div class="ms-1 form-group form-check form-switch kudosTextToggle">
+                            <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
+                            <input type="checkbox" class="form-check-input inputCheck" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
+                        </div>
+                    }
                     @if (type != "all" && type != null && sections != "all" && subSections != "all" && type != "Search" && type != "add")
                     {
-                        <div class="ms-1 form-group form-check form-switch kudosTextTop">
-                            <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
-                            <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
-                        </div>
                         <h1 class="kudosTextTop">@sections <small class="text-muted">@subSections </small></h1>
                     }
                     else if (type != "all" && sections != "all" && subSections == "all" && type != "Search" && type != "add")
                     {
-                    <div class="ms-1 form-group form-check form-switch kudosTextTop">
-                        <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
-                        <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
-                    </div>
                     <h1 class="kudosTextTop">@type <small class="text-muted">@sections </small></h1>
                     }
                     else if (type != "all" && sections == "all" && type != "Search" && type != "add")
                     {
-                        <div class="ms-1 form-group form-check form-switch kudosTextTop">
-                            <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
-                            <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
-                        </div>
                         <h1 class="kudosTextTop">@type <small class="text-muted"></small></h1>
                     }
                     else if (type == "all")
                     {
-                        <div class="ms-1 form-group form-check form-switch kudosTextTop">
-                            <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
-                            <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
-                        </div>
                         <h1 class="kudosTextTop">All subSections <small class="text-muted"></small></h1>
                     }
                     else if (type == "add")
                     {
-                        <div class="ms-1 form-group form-check form-switch kudosTextTop">
-                            <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
-                            <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
-                        </div>
                         <h1 class="kudosTextTop">Add New Section <small class="text-muted"></small></h1>
                     }
                     else if (type == "Search")
                     {
-                        <div class="ms-1 form-group form-check form-switch kudosTextTop">
-                            <input type="checkbox" class="form-check-input" id="sliderToggle" @bind="inline" @onclick="(() => ClearIsEditingArray())" />
-                            <label class="form-check-label" for="sliderToggle">Switch Between Inline and Full Editor</label>
-                        </div>
                         <h1 class="kudosTextTop">Search Results <small class="text-muted"></small></h1>
                     }
                     @* Show a loading message before API call is complete *@
@@ -107,7 +90,8 @@
                         var countAll = 0;
                         var clearText = "";
                         var username = @context.User.Identity!.Name;
-                        <table class="table rounded table-dark table-borderless">  @* @(inline == true ? "" : "") *@
+                        <table class="table rounded table-dark @(inline == true ? "border-bottom" : "table-borderless table-striped")">
+                            @* @(inline == true ? "" : "") *@
                             <tbody>
                                 @* Pragmatically populate the table using my customer object array *@
                                 @foreach (var contentHolder in contentHolderList)
@@ -120,11 +104,8 @@
                                             var localCountAll = countAll;
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                <td class="kudosText"><h3><small class="text-muted"></small></h3></td> @*@contentHolder.subSection*@
-                                            </tr>
-                                            <tr>
-                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                 <td>
+                                                    <h3 class="kudosTextInline"><small class="text-muted"></small></h3>
                                                     <div class="dotted-lines" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                         <Editor Id="@count.ToString()"
                                                             Inline=true
@@ -142,9 +123,6 @@
                                         {
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                <td class="kudosText"><h3><small class="text-muted"></small></h3></td>@*@contentHolder.subSection*@
-                                            </tr>
-                                            <tr>
                                                 @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                 <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -205,11 +183,8 @@
                                             var localCountAll = countAll;
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                <td class="kudosText"><h3><small class="text-muted">@contentHolder.subSection</small></h3></td>
-                                            </tr>
-                                            <tr>
-                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                 <td>
+                                                    <h3 class="kudosTextInline"><small class="text-muted">@contentHolder.subSection</small></h3>
                                                     <div class="dotted-lines" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                     <Editor
                                                         Id="@count.ToString()"
@@ -228,9 +203,7 @@
                                         {
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                <td class="kudosText"><h3><small class="text-muted">@contentHolder.subSection</small></h3></td>
-                                            </tr>
-                                            <tr>
+                                                <td class="kudosText col-1"><h4><br><small class="text-muted">@contentHolder.subSection</small></h4></td>
                                                 @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                 <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -251,6 +224,9 @@
                                             var localCount = count;
                                             var localCountAll = countAll;
                                             <tr>
+                                                <td>
+                                                    @*Spacing*@
+                                                </td>
                                                 @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                                 <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                 <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
@@ -274,11 +250,8 @@
                                             var localCountAll = countAll;
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                <td class="kudosText"><h3>@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3></td>
-                                            </tr>
-                                            <tr>
-                                                @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                 <td>
+                                                    <h3 class="kudosTextInline">@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3>
                                                     <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                     <Editor
                                                         Id="@count.ToString()"
@@ -297,9 +270,7 @@
                                         {
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                <td class="kudosText"><h3>@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3></td>
-                                            </tr>
-                                            <tr>
+                                                <td class="kudosText col-1"><h4>@contentHolder.section<br><small class="text-muted">@contentHolder.subSection</small></h4></td>
                                                 @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                 <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -320,6 +291,9 @@
                                             var localCount = count;
                                             var localCountAll = countAll;
                                             <tr>
+                                                <td>
+                                                    @*Spacing*@
+                                                </td>
                                                 @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                                 <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                 <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
@@ -344,11 +318,8 @@
                                                     var localCountAll = countAll;
                                                     <tr>
                                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                        <td class="kudosText"><h3>@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3></td>
-                                                    </tr>
-                                                    <tr>
-                                                        @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                         <td>
+                                                            <h3 class="kudosTextInline">@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3>
                                                             <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                             <Editor
                                                                 Id="@count.ToString()"
@@ -367,9 +338,7 @@
                                                 {
                                                     <tr>
                                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                        <td class="kudosText"><h3>@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3></td>
-                                                    </tr>
-                                                    <tr>
+                                                        <td class="kudosText col-1"><h4>@contentHolder.section<br><small class="text-muted">@contentHolder.subSection</small></h4></td>
                                                         @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                         <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                         @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -390,6 +359,9 @@
                                                     var localCount = count;
                                                     var localCountAll = countAll;
                                                     <tr>
+                                                        <td>
+                                                            @*Spacing*@
+                                                        </td>
                                                         @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                                         <td><button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                         <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
@@ -415,11 +387,8 @@
                                                 var localCountAll = countAll;
                                                 <tr>
                                                     @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                    <td class="kudosText"><h3>@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3></td>
-                                                </tr>
-                                                <tr>
-                                                    @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
                                                     <td>
+                                                        <h3 class="kudosTextInline">@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3>
                                                         <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                             <Editor Id="@count.ToString()"
                                                                 Inline=true
@@ -437,9 +406,7 @@
                                             {
                                                 <tr>
                                                     @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                    <td class="kudosText"><h3>@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3></td>
-                                                </tr>
-                                                <tr>
+                                                    <td class="kudosText col-1"><h4>@contentHolder.section<br><small class="text-muted">@contentHolder.subSection</small></h4></td>
                                                     @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                     <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                     @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -462,6 +429,9 @@
                                                 <tr>
                                                     @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                                     <td>
+                                                    <td>
+                                                        @*Spacing*@
+                                                    </td>
                                                         <button class="btn btn-outline-warning" @onclick="(() => ClearContent(localCount, localCountAll))">Clear</button>
                                                         <button class="btn btn-outline-danger" @onclick="(() => RemoveSection(localCountAll, username!))">Delete</button>
                                                         <button class="btn btn-outline-primary" @onclick="(() => Edit(localCount, localCountAll))" hidden="@IsEditing[localCount]">Edit</button>
@@ -513,8 +483,8 @@
                                         var localCount = count;
                                         var localCountAll = countAll;
                                         <tr>
-                                            <td><h3>New Section: </h3></td>
-                                            <td><div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, true))">
+                                            <td><h3 class="kudosTextInline">New Section: </h3>
+                                                <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, true))">
                                                 <Editor
                                                     Id="@count.ToString()"
                                                     Inline=true
@@ -534,7 +504,7 @@
                                         count = 0;
                                         var localCountAll = countAll;
                                         <tr>
-                                            <td>New Section: </td>
+                                            <td class="kudosText">New Section: </td>
                                             @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                             <td hidden="@IsEditing[count]">@(new MarkupString(contentHolderList.Last().content!))</td>
                                             <td hidden="@(!IsEditing[count])"><div class="dotted-lines tinymce-editor">
@@ -551,6 +521,9 @@
                                             </div></td>
                                         </tr>
                                         <tr>
+                                            <td>
+                                                @*Spacing*@
+                                            </td>
                                             @* Button bank to be generated per section.  Using lambda expression to parse value to function *@
                                             <td><button class="btn btn-outline-warning" @onclick="()=>contentHolderList.Last().content = clearText">Clear</button>
                                             <button class="btn btn-outline-primary" @onclick="(() => Save(localCount, username!, localCountAll, true))" hidden="@(!IsEditing[localCount])">Save</button>
@@ -763,7 +736,6 @@
             for (int i = 0; i < IsEditing!.Length; i++)
             {
                 IsEditing[i] = false;
-                Console.WriteLine(i +""+ IsEditing[i] + " Out of: " + IsEditing.Length);
                 StateHasChanged();
             }
         }
@@ -808,7 +780,6 @@
     @* Method to clear specific sections content *@
     private void ClearContent(int localSectionNo, int globalSectionNo)
     {
-        Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
         contentHolderList![globalSectionNo].content = "";
         IsEditing![localSectionNo] = true;
     }
@@ -848,7 +819,6 @@
             EditParser(localSectionNo, globalSectionNo, oldSHA, oldUpdateCount);
         }
         StateHasChanged();
-        Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo + "editing? " + IsEditing![localSectionNo]);
     }
     @* Set selected section's IsEditing to false, then call method to PUT new JSON to GitHub.  Should render updated content to DOM *@
     private async void Save(int sectionNo, string username, int globalSectionNo, bool newSec)
@@ -920,7 +890,6 @@
     @* Set sections IsEditing to false, and set the content to the stored previous state *@
     private async void Cancel(int localSectionNo, int globalSectionNo)
     {
-        Console.WriteLine("Local: " + localSectionNo + "Global: " + globalSectionNo);
     @* If statement needed here so canceling on a newly added section will remove it *@
         if (initialContent![globalSectionNo] != null)
         {
@@ -963,7 +932,6 @@
         {
             finalName = sectionName;
         }
-        Console.WriteLine(finalType + " " + finalName + " " + subName);
         if (!String.IsNullOrWhiteSpace(finalType) && !String.IsNullOrWhiteSpace(finalName))
         {
             @* Best way to add to an array is to resize then initialize the new index *@

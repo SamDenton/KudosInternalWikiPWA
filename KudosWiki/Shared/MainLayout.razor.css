@@ -65,6 +65,10 @@ main {
     .logindispSmall {
         /*display: none;*/
     }
+
+    .sidebar {
+        height: 100vh;
+    }
 }
 
 @media (max-width: 689.98px) {
@@ -79,6 +83,7 @@ main {
     .sidebar {
         position: sticky;
         top: 0;
+        height: 100vh;
         /*display: none;*/
     }
     
