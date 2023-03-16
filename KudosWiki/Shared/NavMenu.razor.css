@@ -7,8 +7,74 @@
     background-color: rgba(0,0,0,0.4);
 }
 
+.nav-container {
+    position: relative;
+    height: 100%;
+    /*overflow: hidden;*/
+}
+
+.scroll-container {
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.nav-menu {
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
 .typeText {
     font-size: xx-large!important;
+}
+
+.oi-caret-right {
+    margin-left: 5px;
+}
+
+navlink {
+    margin-left: -10px!important;
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in forwards;
+}
+
+.fade-out {
+    opacity: 1;
+    animation: fadeOut 0.5s ease-in forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }
 
 .navbar-brand {
@@ -16,23 +82,28 @@
 }
 
 .navSubContainer {
+    background-color: rgba(0, 0, 0, 0);
     border: none;
     padding: 0;
-    margin: 0.25rem;
+    margin: 1rem;
     border-radius: 5px;
 }
 
 .hide {
-    animation: hideSubContiner 0.3s ease-in-out forwards;
+    animation: hideSubContiner 0.2s ease-in-out forwards;
 }
 
 .show {
-    animation: showSubContiner 0.3s ease-in-out forwards;
+    animation: showSubContiner 0.5s ease-in-out forwards;
 }
 
 @keyframes hideSubContiner {
     0% {
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    10% {
+        background-color: rgba(0, 0, 0, 0.1);
     }
 
     100% {
@@ -43,10 +114,16 @@
 @keyframes showSubContiner {
     0% {
         background-color: rgba(0, 0, 0, 0);
+        max-height: 56px
+    }
+
+    50% {
+
     }
 
     100% {
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.3);
+        max-height: 500px;
     }
 }
 
@@ -56,6 +133,17 @@
     vertical-align: text-top;
     top: -2px;
 }
+
+.auto-scroll {
+    max-height: calc(100vh - 56px);
+    overflow-y: auto;
+    /*scroll-snap-type: y mandatory;
+    scroll-padding: 20px;*/
+}
+
+    .auto-scroll .navSubContainer {
+        /*scroll-snap-align: center;*/
+    }
 
 .dropdown-divider {
     margin-top: -0px;
