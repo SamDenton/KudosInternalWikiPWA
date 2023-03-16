@@ -67,6 +67,7 @@ let navHeight;
 let navItemsHeight;
 let isMouseOverNav = false;
 let prevTop = 0;
+let animationStarted = false;
 
 
 function initScrollingMenu(navContainerSelector, scrollContainerSelector, navSelector) {
@@ -74,24 +75,24 @@ function initScrollingMenu(navContainerSelector, scrollContainerSelector, navSel
     scrollContainer = document.querySelector(scrollContainerSelector);
     nav = document.querySelector(navSelector);
 
-    navItemsContainer = nav.querySelector('.nav-items-container');
-    navItemsContainerClone1 = navItemsContainer.cloneNode(true);
-    navItemsContainerClone2 = navItemsContainer.cloneNode(true);
+    setTimeout(() => {
+        const navItemsContainer = nav.querySelector('.nav-items-container');
+        const navItemsContainerClone1 = navItemsContainer.cloneNode(true);
+        const navItemsContainerClone2 = navItemsContainer.cloneNode(true);
 
-    nav.prepend(navItemsContainerClone1);
-    nav.append(navItemsContainerClone2);
+        nav.prepend(navItemsContainerClone1);
+        nav.append(navItemsContainerClone2);
+        containerHeight = navContainer.offsetHeight;
+        navHeight = nav.offsetHeight;
+        navItemsHeight = navItemsContainer.offsetHeight;
+        maxTop = containerHeight - navHeight - (navHeight / 2);
 
-    containerHeight = navContainer.offsetHeight;
-    navHeight = nav.offsetHeight;
-    navItemsHeight = navItemsContainer.offsetHeight;
-    maxTop = containerHeight - navHeight - (navHeight / 2);
+        currentTop = (containerHeight - navItemsHeight * 3) / 2; // Update currentTop calculation
+        scrollContainer.style.top = `${currentTop}px`;
 
-    currentTop = maxTop / 2 - containerHeight / 2 + navItemsHeight;
-    scrollContainer.style.top = `${currentTop}px`;
-
-    navContainer.addEventListener("mousemove", onMouseMove);
-    navContainer.addEventListener("mouseleave", onMouseLeave);
-
+        navContainer.addEventListener("mousemove", onMouseMove);
+        navContainer.addEventListener("mouseleave", onMouseLeave);
+    }, 500); // Set the delay time in milliseconds (e.g., 500ms)
 }
 
 function calculateScrollSpeed(mouseY, containerHeight, maxSpeed) {
@@ -115,28 +116,37 @@ function onMouseMove(event) {
         const navContainerRect = navContainer.getBoundingClientRect();
         const mouseY = event.clientY - navContainerRect.top;
         const scrollPosition = mouseY / containerHeight;
-        maxTop = containerHeight - navHeight - (navHeight/2);
+        maxTop = containerHeight - navItemsHeight * 3 + navItemsHeight * 2;
 
         // Calculate scrolling speed based on the mouse position
-        const maxSpeed = 0.6; // Set the maximum scrolling speed
+        const maxSpeed = 2.5; // Set the maximum scrolling speed
         const speed = calculateScrollSpeed(mouseY, containerHeight, maxSpeed);
-        const newTop = maxTop * (scrollPosition - 0.5) * speed;
+        const newTop = (maxTop * (scrollPosition - 0.5) * speed) - navItemsHeight;
 
         updatePosition(newTop);
     }
 
-    window.requestAnimationFrame(() => {
-        if (isMouseOverNav) {
-            onMouseMove(event);
-        }
-    });
+    // Start the animation loop only if it has not been started
+    if (!animationStarted) {
+        animationStarted = true;
+        animateMouseMove(event);
+    }
+}
+
+function animateMouseMove(event) {
+    if (isMouseOverNav) {
+        window.requestAnimationFrame(() => onMouseMove(event));
+    } else {
+        // Reset the animationStarted flag when the mouse leaves the nav
+        animationStarted = false;
+    }
 }
 
 function updatePosition(targetTop) {
-    const smoothingFactor = 0.1; // Change this value to control the smoothness of the animation
+    const smoothingFactor = 0.05; // Change this value to control the smoothness of the animation
     prevTop = currentTop; // Store the current top position before updating
     currentTop += (targetTop - currentTop) * smoothingFactor;
-    currentTop = currentTop - 40;
+    //currentTop = currentTop - 15;
     scrollContainer.style.top = `${currentTop}px`;
 
     if (Math.abs(targetTop - currentTop) > 0.5) {
