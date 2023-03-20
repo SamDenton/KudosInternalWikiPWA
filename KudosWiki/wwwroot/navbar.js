@@ -68,13 +68,14 @@ let navItemsHeight;
 let isMouseOverNav = false;
 let prevTop = 0;
 let animationStarted = false;
-
+let momentumFactor = 0.951;
 
 function initScrollingMenu(navContainerSelector, scrollContainerSelector, navSelector) {
     navContainer = document.querySelector(navContainerSelector);
     scrollContainer = document.querySelector(scrollContainerSelector);
     nav = document.querySelector(navSelector);
-
+    navContainer.addEventListener("mousemove", onMouseMove);
+    navContainer.addEventListener("mouseleave", onMouseLeave);
     setTimeout(() => {
         const navItemsContainer = nav.querySelector('.nav-items-container');
         const navItemsContainerClone1 = navItemsContainer.cloneNode(true);
@@ -85,13 +86,11 @@ function initScrollingMenu(navContainerSelector, scrollContainerSelector, navSel
         containerHeight = navContainer.offsetHeight;
         navHeight = nav.offsetHeight;
         navItemsHeight = navItemsContainer.offsetHeight;
-        maxTop = containerHeight - navHeight - (navHeight / 2);
+        maxTop = containerHeight - ((navHeight * 3) / 2);
 
         currentTop = (containerHeight - navItemsHeight * 3) / 2; // Update currentTop calculation
         scrollContainer.style.top = `${currentTop}px`;
-
-        navContainer.addEventListener("mousemove", onMouseMove);
-        navContainer.addEventListener("mouseleave", onMouseLeave);
+        applyEffects();
     }, 500); // Set the delay time in milliseconds (e.g., 500ms)
 }
 
@@ -110,18 +109,16 @@ function onMouseMove(event) {
     isMouseOverNav = true;
     navHeight = nav.offsetHeight;
     containerHeight = navContainer.offsetHeight;
-    navItemsHeight = nav.querySelector('.nav-items-container').offsetHeight;
-
     if (navHeight > containerHeight) {
         const navContainerRect = navContainer.getBoundingClientRect();
         const mouseY = event.clientY - navContainerRect.top;
-        const scrollPosition = mouseY / containerHeight;
-        maxTop = containerHeight - navItemsHeight * 3 + navItemsHeight * 2;
+        const scrollPosition = (mouseY - containerHeight / 2) / (containerHeight / 2);
+        maxTop = containerHeight - ((navHeight * 3) / 2);
 
         // Calculate scrolling speed based on the mouse position
-        const maxSpeed = 2.5; // Set the maximum scrolling speed
+        const maxSpeed = 0.1; // Set the maximum scrolling speed
         const speed = calculateScrollSpeed(mouseY, containerHeight, maxSpeed);
-        const newTop = (maxTop * (scrollPosition - 0.5) * speed) - navItemsHeight;
+        const newTop = maxTop * scrollPosition * speed - (navHeight - containerHeight) / 2;
 
         updatePosition(newTop);
     }
@@ -146,30 +143,61 @@ function updatePosition(targetTop) {
     const smoothingFactor = 0.05; // Change this value to control the smoothness of the animation
     prevTop = currentTop; // Store the current top position before updating
     currentTop += (targetTop - currentTop) * smoothingFactor;
-    //currentTop = currentTop - 15;
     scrollContainer.style.top = `${currentTop}px`;
+    applyEffects();
+}
 
-    if (Math.abs(targetTop - currentTop) > 0.5) {
-        window.requestAnimationFrame(() => updatePosition(targetTop));
+function applyMomentum(targetTop, momentum) {
+    if (Math.abs(momentum) < 0.001) {
+        return targetTop;
     }
+
+    const newTargetTop = targetTop + momentum;
+    const newMomentum = momentum * momentumFactor;
+
+    return applyMomentum(newTargetTop, newMomentum);
 }
 
 function onMouseLeave(event) {
-    // Apply momentum effect when the cursor leaves the navbar
-    applyMomentum();
     isMouseOverNav = false; // Set the flag to false when the mouse leaves the navbar
+    animationStarted = false;
+    if (!animationStarted) {
+        // Calculate the momentum based on the difference between the current and previous top positions
+        const momentum = (currentTop - prevTop) * momentumFactor;
+        //alert(currentTop + " " + prevTop + " " + momentum);
+        // Apply the momentum to the target top position
+        const targetTopWithMomentum = applyMomentum(currentTop, momentum);
+        //alert(momentum)
+        // Update the position with the new target top
+        updatePosition(targetTopWithMomentum);
+
+        // Start the animation loop to apply the momentum smoothly
+        animationStarted = true;
+    }
+
+    if (Math.abs(currentTop - prevTop) > 0.001) {
+        window.requestAnimationFrame(() => onMouseLeave(event));
+    } else {
+        // Reset the animationStarted flag when the momentum effect has ended
+        animationStarted = false;
+    }
 }
 
-function applyMomentum() {
-    const deltaTop = currentTop - prevTop;
-    const targetTop = targetTop * momentumFactor;
+function applyEffects() {
+    const navItems = nav.querySelectorAll('.item-fader');
+    const centerY = containerHeight / 2;
 
-    // Clamp the targetTop value within the allowable range
-    const clampedTargetTop = Math.max(Math.min(targetTop, 0), maxTop);
+    navItems.forEach((navItem) => {
+        const navItemRect = navItem.getBoundingClientRect();
+        const navContainerRect = navContainer.getBoundingClientRect();
+        const navItemCenterY = navItemRect.top + navItemRect.height / 2 - navContainerRect.top;
+        const distanceFromCenter = Math.abs(navItemCenterY - centerY);
+        const scaleFactor = 1 - (distanceFromCenter / containerHeight * 0.5);
+        const opacityFactor = Math.max(0, 1 - (distanceFromCenter / (containerHeight / 2) * 0.5));
 
-    updatePosition(clampedTargetTop);
+        navItem.style.transform = `scale(${scaleFactor})`;// translateY(-50%)
+        navItem.style.opacity = opacityFactor;
+    });
 }
-
-
 
 window.initScrollingMenu = initScrollingMenu;
