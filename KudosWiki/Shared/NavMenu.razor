@@ -94,13 +94,18 @@
     private string? token;
     private ElementReference navMenu;
     private bool firstRender = true;
+    private int uniqueSectionsCount;
+
     protected override async Task OnInitializedAsync()
     {
         var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
         await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
         myStateContainer.OnStateChange += RefreshMe;
-        var uniqueSectionsCount = contentHolderList.GroupBy(x => x.section).Count();
+        if (contentHolderList != null)
+        {
+            uniqueSectionsCount = contentHolderList.GroupBy(x => x.section).Count();
+        }
         Array.Resize(ref showSubSections, uniqueSectionsCount);
         Array.Fill(showSubSections, false);
         //await JSRuntime.InvokeVoidAsync("scrollNavMenu");

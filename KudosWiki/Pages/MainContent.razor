@@ -184,7 +184,7 @@
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                 <td>
-                                                    <h3 class="kudosTextInline"><small class="text-muted">@contentHolder.subSection</small></h3>
+                                                    <h3 class="kudosTextInline"><small><div class="text-muted">@contentHolder.subSection</div></small></h3>
                                                     <div class="dotted-lines" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                     <Editor
                                                         Id="@count.ToString()"
@@ -203,7 +203,7 @@
                                         {
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                <td class="kudosText col-1"><h4><br><small class="text-muted">@contentHolder.subSection</small></h4></td>
+                                                <td class="kudosText col-1"><h4>@contentHolder.subSection</h4></td>
                                                 @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                 <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -251,7 +251,7 @@
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                 <td>
-                                                    <h3 class="kudosTextInline">@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3>
+                                                    <h3 class="kudosTextInline">@contentHolder.section <small><div class="text-muted">@contentHolder.subSection</div></small></h3>
                                                     <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                     <Editor
                                                         Id="@count.ToString()"
@@ -270,7 +270,7 @@
                                         {
                                             <tr>
                                                 @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                <td class="kudosText col-1"><h4>@contentHolder.section<br><small class="text-muted">@contentHolder.subSection</small></h4></td>
+                                                <td class="kudosText col-1"><h4>@contentHolder.section<br><small><div class="text-muted">@contentHolder.subSection</div></small></h4></td>
                                                 @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                 <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                 @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -319,7 +319,7 @@
                                                     <tr>
                                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                         <td>
-                                                            <h3 class="kudosTextInline">@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3>
+                                                            <h3 class="kudosTextInline">@contentHolder.section <small><div class="text-muted">@contentHolder.subSection</div></small></h3>
                                                             <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                             <Editor
                                                                 Id="@count.ToString()"
@@ -338,7 +338,7 @@
                                                 {
                                                     <tr>
                                                         @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                        <td class="kudosText col-1"><h4>@contentHolder.section<br><small class="text-muted">@contentHolder.subSection</small></h4></td>
+                                                        <td class="kudosText col-1"><h4>@contentHolder.section<br><small><div class="text-muted">@contentHolder.subSection</div></small></h4></td>
                                                         @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                         <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                         @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -388,7 +388,7 @@
                                                 <tr>
                                                     @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
                                                     <td>
-                                                        <h3 class="kudosTextInline">@contentHolder.section <small class="text-muted">@contentHolder.subSection</small></h3>
+                                                        <h3 class="kudosTextInline">@contentHolder.section <small><div class="text-muted">@contentHolder.subSection</div></small></h3>
                                                         <div class="dotted-lines tinymce-editor" @onfocusout="(() => Save(localCount, username!, localCountAll, false))">
                                                             <Editor Id="@count.ToString()"
                                                                 Inline=true
@@ -406,7 +406,7 @@
                                             {
                                                 <tr>
                                                     @* Currently showing all details about the section, but once I split into multiple pages, this will likley be hidden *@
-                                                    <td class="kudosText col-1"><h4>@contentHolder.section<br><small class="text-muted">@contentHolder.subSection</small></h4></td>
+                                                    <td class="kudosText col-1"><h4>@contentHolder.section<br><small><div class="text-muted">@contentHolder.subSection</div></small></h4></td>
                                                     @* Render the de-serialized JSON string as HTML, including styling.  I need some sanitisation here but AntiXss from Microsoft is broken ATM... *@
                                                     <td hidden="@IsEditing![count]">@(new MarkupString(@contentHolder.content!))</td>
                                                     @* When IsEditing is true, render the WYSIWYG editor, i'm using TinyMCE *@
@@ -1065,7 +1065,7 @@
             catch (Exception ex)
             {
                 Console.WriteLine("Error: " + ex.Message);
-                loadingMSG += "Error Loading Content: " + ex.Message;
+                loadingMSG += "Error Loading Content: " + ex.Message + "Check size of DB";
                 StateHasChanged();
             }
             StateHasChanged();

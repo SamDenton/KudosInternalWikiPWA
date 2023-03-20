@@ -69,6 +69,7 @@ let isMouseOverNav = false;
 let prevTop = 0;
 let animationStarted = false;
 let momentumFactor = 0.951;
+let fadeEffectStrength = 0.3;
 
 function initScrollingMenu(navContainerSelector, scrollContainerSelector, navSelector) {
     navContainer = document.querySelector(navContainerSelector);
@@ -192,8 +193,8 @@ function applyEffects() {
         const navContainerRect = navContainer.getBoundingClientRect();
         const navItemCenterY = navItemRect.top + navItemRect.height / 2 - navContainerRect.top;
         const distanceFromCenter = Math.abs(navItemCenterY - centerY);
-        const scaleFactor = 1 - (distanceFromCenter / containerHeight * 0.5);
-        const opacityFactor = Math.max(0, 1 - (distanceFromCenter / (containerHeight / 2) * 0.5));
+        const scaleFactor = 1 - (distanceFromCenter / containerHeight * fadeEffectStrength);
+        const opacityFactor = Math.max(0, 1 - (distanceFromCenter / (containerHeight / 2) * fadeEffectStrength));
 
         navItem.style.transform = `scale(${scaleFactor})`;// translateY(-50%)
         navItem.style.opacity = opacityFactor;
