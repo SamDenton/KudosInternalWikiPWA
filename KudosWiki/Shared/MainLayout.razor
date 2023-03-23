@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <div class="page">
     <div class="sidebar sidebarController">
@@ -56,6 +57,16 @@
         if (firstRender)
         {
             await JSRuntime.InvokeVoidAsync("initNavbar");
+            await JSRuntime.InvokeVoidAsync("customRefresh.preventRefresh");
+            CheckNavigationTypeAsync();
+        }
+    }
+    private async Task CheckNavigationTypeAsync()
+    {
+        var navType = await JSRuntime.InvokeAsync<string>("customRefresh.getNavigationType");
+        if (navType == "reload" || navType == "back_forward")
+        {
+            NavigationManager.NavigateTo("/");
         }
     }
 }
