@@ -127,12 +127,13 @@ a, .btn-link {
 
 /* width */
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 5px;
     border-radius: 0px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
+    margin-top: 56px;
     background: #212529;
     border-radius: 0px;
 }

@@ -41,8 +41,8 @@
                             var sectionName = sectionGroup.Key;
                             <div class="item-fader navSubContainer @(showSubSections![localCount] == true ? "show" : "hide")">
                                 <div class="p-1 item-fader nav-item px-1 font-weight-bold" @onclick="(async () => { Array.Fill(showSubSections!, false, 0, localCount); if (showSubSections[localCount] == false) {showSubSections[localCount] = !showSubSections[localCount];} else {await FadeOut(); await Task.Delay(500); showSubSections[localCount] = !showSubSections[localCount];} Array.Fill(showSubSections, false, localCount+1, showSubSections.Length-localCount-1); StateHasChanged(); Console.WriteLine(showSubSections[localCount]); } )">
-                                    <NavLink class="p-1 nav-link text-muted" href=@($"/{type}/{sectionName}/all")>
-                                        <h3 class="oi text-muted text-nowrap text-truncate @(showSubSections![localCount] == true ? "oi-caret-bottom" : "oi-caret-right")" style="width:100%;"> &nbsp @sectionName</h3> @*@(showSubSections[localCount] == true ? "oi-plus" : "oi-minus"*@
+                                    <NavLink class="p-1 nav-link" href=@($"/{type}/{sectionName}/all")>
+                                        <h3 class="oi text-nowrap text-truncate @(showSubSections![localCount] == true ? "oi-caret-bottom" : "oi-caret-right text-muted")" style="width:100%;"><span class="oi @(showSubSections![localCount] == true ? "oi-inner-text" : "oi-inner-text-right")"> &nbsp @sectionName</span> </h3>
                                     </NavLink>
                                 </div>
                                 @if (showSubSections![localCount])

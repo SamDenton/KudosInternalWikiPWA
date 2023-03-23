@@ -48,8 +48,21 @@ nav {
     font-size: xx-large!important;
 }
 
-.oi-caret-right {
-    margin-left: 5px;
+oi-inner-text-right {
+    position: absolute;
+    margin-top: -13px;
+}
+
+.oi-caret-bottom {
+    margin-top: 4px;
+}
+.oi {
+    margin-top: auto;
+}
+
+.oi-inner-text {
+    position: absolute;
+    margin-top: -2px;
 }
 
 navlink {

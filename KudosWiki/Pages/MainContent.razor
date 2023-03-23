@@ -51,7 +51,7 @@
                     }
                     else if (type == "all")
                     {
-                        <h1 class="kudosTextTop">All subSections <small class="text-muted"></small></h1>
+                        <h1 class="kudosTextTop"></h1>
                     }
                     else if (type == "add")
                     {
@@ -629,7 +629,7 @@
     [Parameter]
     public string? subSections { get; set; }
     @* Declare Global Vars *@
-    private bool? inline { get; set; } = false;
+    private bool? inline { get; set; } = true;
     private string[]? initialContent;
     private bool[]? IsEditing;
     private string? typeDropdown;
