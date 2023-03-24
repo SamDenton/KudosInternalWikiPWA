@@ -1043,6 +1043,10 @@
         }
     }
     @* Retrieve content from GitHub as a JSON string *@
+    @* I should look to split this into a number of functions for each section *@
+    @* need to think about weather I want 2 functions, 1 for all sections and one of indevidual, or if I can work out both in 1 *@
+    @* Think im limted to 1000 files per request, but that might be 1000 files total for the dir to be acessable *@
+    @* I'm hoping to get the whole directory in a single API call to initialise and build menu etc, but might have to get each file with sepotate calls, which till be slow... *@
     public async Task GetContentFromGitHubRepo<T>(string username, string repositoryName, string token, bool checking)
     {
         using (var client = new HttpClient())
