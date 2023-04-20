@@ -26,6 +26,7 @@ main {
     background-color: #212529;
     width: 100vh;
 }
+
 .logindisp {
     justify-content: flex-end;
     display: flex;
