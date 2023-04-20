@@ -99,7 +99,7 @@ input:-moz-placeholder {
 
 /* Track */
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #212529;
     border-radius: 0px;
 }
 
