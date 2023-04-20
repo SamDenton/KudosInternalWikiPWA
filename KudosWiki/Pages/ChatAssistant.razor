@@ -45,7 +45,7 @@
 </AuthorizeView>
 
 @code {
-    private const string API_KEY = "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";
+    private string API_KEY;
     private string inputText = "";
     private string currentConversationId;
     private Dictionary<string, List<Message>> history = new Dictionary<string, List<Message>>();
@@ -55,6 +55,8 @@
     {
         if (firstRender)
         {
+            var getFromTokens = await Http.GetAsync("ChatToken.txt");
+            API_KEY = await getFromTokens.Content.ReadAsStringAsync();
             currentConversationId = $"Conversation {Guid.NewGuid()}";
             currentConversation.Add(new Message { role = "system", content = "You are a helpful, polite chatbot assistant built by Kudos Software to assist our customers with issues before they are raised to the support team.  You will only answer questions related to EPoS systems, tills, printers and gift aid.  If other questions are asked, you will reply Sorry, that query is outside my scope, please contact support." });
         }
