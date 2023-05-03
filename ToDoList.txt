@@ -1,7 +1,112 @@
--Should add a new component to retrieve the commit history of the data vault to create a log.  At least names and dates, but could include changes
--(In progress) Need a new component, probally a child of mainContent, to display an expanded list of sections for faster navigation
--Need to work on compatability with smll screens/mobiles.  Current nav menu is broken
--(Done but needs testing) Look at autologin when first browsing to site
--Need to optomise code, theres lots of repeated methods/functions, and lots of unessasary calls
--Generally improve UI and look of the app from feedback
--Need to do something with the home screen, either add a quick search function or some links etc.
+Suggestions: 
+(Check to-do-list as I've had a lot of feedback since this version was posted!) 
+
+-Add hovering buttons to inline editor 
+
+ 
+
+Errors/Warning: 
+(Please post what you did to cause, what error and if its an ‘unhandled error’ please hit f12 and screen shot the top of the red sections.)
+
+-NavBar does not work on mobile/touch 
+
+Current To-Do-List: 
+
+-(In Progress – should keep edits atm, but does not show both versions) - Should add a popup, so if user tries to save an edit after a database change is detected, it asks them if they want to keep and upload their edit, or discard.  It should show the current section in both DB and local and ask which to keep 
+
+-Make type, section and subSection editable 
+
+-add an icon for installed app, tab on browser etc 
+
+-(In progress) Really need to start adding some error checking/suppression.  one example is 2 people saving at same time.  Would be nice to give alerts to the user as toast notifications but pain 
+
+-need to give everything the same theme.  Either make text white and grey, or kudosText a light blue. If im feeling ambitious  i could add a theme selector for dark, light and kudos 
+
+-(Mostly fixed just testing) Could have a function that checks api for changes before put? would refresh page to update but somehow keep users current changes??? 
+
+-add control buttons to inline editor, probs as small icons.  Might be able to position them above (z) the editor? 
+
+-(Continuius UI improvements) - Could style borders to main content table more like gmail, ie rounded and slightly different background colour to page 
+
+-Add an update button for app (https://whuysentruit.medium.com/blazor-wasm-pwa-adding-a-new-update-available-notification-d9f65c4ad13) 
+
+-Should add a new component to retrieve the commit history of the data vault to create a log.  At least names and dates, but could include changes 
+
+-(In progress) Need to work on compatibility with small screens/mobiles.  Current nav menu is broken.  
+
+-Need to optimise code, there's lots of repeated methods/functions, and lots of unessasary api calls 
+
+
+Fixed already/change log: 
+
+need to add fourth property to objects 
+
+'all' still showing on all page 
+
+see if it looks better to edit current navbar to be expanded list or remove and improve current list 
+
+might not need a home screen at all tbh 
+
+make search bar background darker? 
+
+remove the word 'section' from the top left of the main table and replace 'content' with something more interesting 
+
+Once I have 4 properties per object, i should display only middle 2 properties, not type 
+
+Give page a better name give it shows on app as 'content' 
+
+Will have to decide if each iteration of the third property will have its own row on the table, or if each section will be a row (did row per sunSection) 
+
+create a feedback doc on teams, or a feed back page on the site, with todo list, suggestions, bugs/errors (f12 screenshot red bit and send to me) 
+
+replace ugly scroll bars, would look better for main content component to have its own scroll bar, dont need to to overlap navbar 
+
+Need to do something with the home screen, either add a quick search function or some links etc.  Or just remove home screen, it serves no purpose 
+
+Make type a user generated field 
+
+need to add copy paste to the right click menu 
+
+Should make 'section' a dropdown on the add section page, showing existing sections, with add at the bottom and add the same to type.  Third property can be text box i think 
+
+(In Progress) Once I have moved expanded section list to the left i should add each type and section to list with a different icon for each.  Dont need third property 
+
+Fixed bug where inline editor shows over navBar on mobile 
+
+Added a check before allowing user to edit content or save 
+
+Unhandled error when 2 people save at the same time.  First persons save is applied, second save is ignored and returns an error.  Because the SHA is updated with each PUT, you will need to reload content before making another save.  I should make this update automatic in the background. 
+
+play around with moving the navbar to the top 
+
+play around with cascading navbar on hover 
+
+Added autologin feature 
+
+add kudos logo in top left in place of work kudos, maybe with inverted colours 
+
+could add a thin grey line around logo/text in top left 
+
+if im adding navbar to top, could replace buttons with icons for content, add and all 
+
+if im adding third property, i should have a contents section at top of each section, but only when a single section is selected.  could maybe have an expanding contents section on multi section pages, but only if i decide not to have third property as part of main cascading menu 
+
+Need to work out JSinterop (maybe, significant changes in .net7) 
+
+(Added 1 min refresh timer) Add a refresh button for content 
+
+Should have an uneditable H tag at the top of the section for section name 
+
+Switch between striped and not striped for inline vs full maybe 
+
+Fergus was mid way through some edits on a section, I made changes to the same section and saved, Fergus instance then alerted him to the change as expected, but overwrote his edits with mine. 
+
+Currently running into the size limit for JSON files on GitHub rest API 
+
+(In Progress) Need to split content into different JSON files per section.  This is going to require some thinking.  If im splitting the content into different arrays based on sections, for example, can I use those groups for display?  is that faster than looping through the whole array.  Should I be doing all this with lists?  Should I GET all sections on initialisation and just update sections is the SHA changes?   guess search still needs the whole array?   
+
+Might need to split images to be their own files on DB 
+
+change colour of text in top right 
+
+ 
