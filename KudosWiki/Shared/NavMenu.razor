@@ -35,10 +35,16 @@
                                 <h2 class="oi oi-list-rich text-muted text-truncate typeText" style="width:100%;"> &nbsp @type</h2>
                             </NavLink>
                         </div>
+                        Console.WriteLine($"Page: {typeGroup.Key}, Count: {typeGroup.Count()}");
                         @foreach (var sectionGroup in typeGroup.GroupBy(c => c.section))
                         {
+                            Console.WriteLine($"Section: {sectionGroup.Key}, Count: {sectionGroup.Count()}");
                             var localCount = count;
-                            var sectionName = sectionGroup.Key;
+                            var sectionName = "";
+                            if (sectionGroup.Key != null)
+                            {
+                                sectionName = sectionGroup.Key;  
+                            }
                             <div class="item-fader navSubContainer @(showSubSections![localCount] == true ? "show" : "hide")">
                                 <div class="p-1 item-fader nav-item px-1 font-weight-bold" @onclick="(async () => { Array.Fill(showSubSections!, false, 0, localCount); if (showSubSections[localCount] == false) {showSubSections[localCount] = !showSubSections[localCount];} else {await FadeOut(); await Task.Delay(500); showSubSections[localCount] = !showSubSections[localCount];} Array.Fill(showSubSections, false, localCount+1, showSubSections.Length-localCount-1); StateHasChanged(); Console.WriteLine(showSubSections[localCount]); } )">
                                     <NavLink class="p-1 nav-link" href=@($"/{type}/{sectionName}/all")>
@@ -107,7 +113,7 @@
         var getFromTokens = await Http.GetAsync("Token.txt");
         token = await getFromTokens.Content.ReadAsStringAsync();
         await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
-        myStateContainer.OnStateChange += RefreshMe;
+        myStateContainer.OnStateChange += async () => await RefreshMe();
         if (contentHolderList != null)
         {
             uniqueSectionsCount = contentHolderList.GroupBy(x => x.section).Count();
@@ -127,11 +133,18 @@
         await JSRuntime.InvokeVoidAsync("fadeOut");
     }
 
-    private async void RefreshMe()
+    private async Task RefreshMe()
     {
         await Task.Delay(1000);
+        Console.WriteLine("making GET");
         await GetContentFromGitHubRepo<contentHolder>(userName, repoName, token!);
         Console.WriteLine("Triggered on navMenu by contentholder " + contentHolderList!.Last().section);
+        if (contentHolderList != null)
+        {
+            uniqueSectionsCount = contentHolderList.GroupBy(x => x.section).Count();
+        }
+        Array.Resize(ref showSubSections, uniqueSectionsCount);
+        Array.Fill(showSubSections, false);
         StateHasChanged();
     }
     @* Retrieve content from GitHub as a JSON string *@
@@ -139,22 +152,37 @@
     {
         using (var client = new HttpClient())
         {
-    @* Initialize the HttpClient object with an authorization header and desired content type *@
+            // Initialize the HttpClient object with an authorization header and desired content type
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", token);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-            @* Send the GET request to the GitHub API *@
-            var response = await client.GetAsync($"https://api.github.com/repos/{username}/{repositoryName}/contents/data.json");
+
+            // Send the GET request to the GitHub API to get the contents of the root directory
+            var response = await client.GetAsync($"https://api.github.com/repos/{username}/{repositoryName}/contents");
+
             try
             {
-                @* Read the response content, parse the content and convert it from base64, then de-serialize the content with my custom class *@
                 var content = await response.Content.ReadAsStringAsync();
-                var gitContent = JsonConvert.DeserializeObject<Content>(content);
-                var contentBytes = Convert.FromBase64String(gitContent!.content!);
-                var jsonContent = Encoding.UTF8.GetString(contentBytes);
-                var array = JsonConvert.DeserializeObject<contentHolder[]>(jsonContent);
-                contentHolderList = array;
-                @* Get the sha of the retrieved file *@
-                @* newSHA = gitContent.sha; *@
+                var gitContents = JsonConvert.DeserializeObject<List<Content>>(content);
+
+                List<contentHolder> localContentHolderList = new List<contentHolder>();
+
+                foreach (var gitContent in gitContents)
+                {
+                    if (gitContent.type == "file" && gitContent.name.EndsWith(".json"))
+                    {
+                        // Send the GET request to the GitHub API to get the content of the individual file
+                        var fileResponse = await client.GetAsync(gitContent.url);
+                        var fileContent = await fileResponse.Content.ReadAsStringAsync();
+                        var fileGitContent = JsonConvert.DeserializeObject<Content>(fileContent);
+
+                        var contentBytes = Convert.FromBase64String(fileGitContent.content);
+                        var jsonContent = Encoding.UTF8.GetString(contentBytes);
+                        var array = JsonConvert.DeserializeObject<List<contentHolder>>(jsonContent);
+
+                        localContentHolderList.AddRange(array);
+                    }
+                }
+                contentHolderList = localContentHolderList!.ToArray();
             }
             catch (Exception ex)
             {
