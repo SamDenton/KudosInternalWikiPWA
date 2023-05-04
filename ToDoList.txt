@@ -10,6 +10,8 @@ Errors/Warning:
 
 -NavBar does not work on mobile/touch 
 
+
+
 Current To-Do-List: 
 
 -(In Progress – should keep edits atm, but does not show both versions) - Should add a popup, so if user tries to save an edit after a database change is detected, it asks them if they want to keep and upload their edit, or discard.  It should show the current section in both DB and local and ask which to keep 
