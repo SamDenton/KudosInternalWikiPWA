@@ -67,6 +67,23 @@
         padding-top: 0px;
     }
 
+.dotted-lines {
+    position:relative;
+}
+
+    .dotted-lines * {
+        z-index: -1;
+    }
+
+.inlineBTN {
+    position: absolute;
+    padding: .05rem .5rem;
+    font-size: .85rem;
+    right: 0px;
+    top: 0px;
+    z-index: 0;
+}
+
 #searchBar {
     margin-top: -74px;
 }

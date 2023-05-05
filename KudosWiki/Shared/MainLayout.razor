@@ -42,21 +42,21 @@
     <AuthorizeView>
         <Authorized>
             <div class="userNameDisp text-muted">
-                @context.User.Identity?.Name
+                @context.User.Identity?.Name @versionNo
             </div>
         </Authorized>
     </AuthorizeView>
 </div>
 
 @code {
+    private bool isChecked { get; set; }
+    private string icon = "Kudos_icon.png";
+    private string versionNo = "V1.0.1";
+
     protected override void OnInitialized()
     {
         Console.WriteLine("MainLayout.razor initialised");
     }
-
-    private bool isChecked { get; set; }
-    private string icon = "Kudos_icon.png";
-
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
