@@ -16,28 +16,30 @@ Current To-Do-List:
 
 -(In Progress – should keep edits atm, but does not show both versions) - Should add a popup, so if user tries to save an edit after a database change is detected, it asks them if they want to keep and upload their edit, or discard.  It should show the current section in both DB and local and ask which to keep 
 
--Make type, section and subSection editable 
+-(Sorted in most locations) - Make type, section and subSection editable 
 
--add an icon for installed app, tab on browser etc 
+-Add an icon for installed app, tab on browser etc.  Might be able to change the display name too?
 
 -(In progress) Really need to start adding some error checking/suppression.  one example is 2 people saving at same time.  Would be nice to give alerts to the user as toast notifications but pain 
 
--need to give everything the same theme.  Either make text white and grey, or kudosText a light blue. If im feeling ambitious  i could add a theme selector for dark, light and kudos 
+-(Currently happy with the theme, but could add a second theme for accesability) - Need to give everything the same theme.  Either make text white and grey, or kudosText a light blue. If im feeling ambitious  i could add a theme selector for dark, light and kudos 
 
--(Mostly fixed just testing) Could have a function that checks api for changes before put? would refresh page to update but somehow keep users current changes??? 
-
--(Continuius UI improvements) - Could style borders to main content table more like gmail, ie rounded and slightly different background colour to page 
+-(This is working, but in some situations it makes more api calls than I expect) Could have a function that checks api for changes before put? would refresh page to update but somehow keep users current changes??? 
 
 -Add an update button for app (https://whuysentruit.medium.com/blazor-wasm-pwa-adding-a-new-update-available-notification-d9f65c4ad13) 
 
 -Should add a new component to retrieve the commit history of the data vault to create a log.  At least names and dates, but could include changes 
 
--(In progress) Need to work on compatibility with small screens/mobiles.  Current nav menu is broken.  
+-(Working but need to play with the scroll disabling code, should have to swipe futher to activate) Need to work on compatibility with small screens/mobiles.  Current nav menu is broken.  
 
 -Need to optimise code, there's lots of repeated methods/functions, and lots of unessasary api calls 
 
+-Clean up console logs
 
-Fixed already/change log: 
+-Should move all SHA matching logic to PUT method, not repeat it in save(), edit() timer() etc.  Can add a return/callback for different cases
+
+
+Fixed/Change log: 
 
 need to add fourth property to objects 
 
@@ -110,4 +112,6 @@ Might need to split images to be their own files on DB
 change colour of text in top right 
 
 -add control buttons to inline editor, probs as small icons.  Might be able to position them above (z) the editor? 
+
+-(Continuius UI improvements) - Could style borders to main content table more like gmail, ie rounded and slightly different background colour to page 
 
