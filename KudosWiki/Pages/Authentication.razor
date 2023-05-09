@@ -1,7 +1,21 @@
 ﻿@page "/authentication/{action}"
+@inject IJSRuntime JSRuntime
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 <RemoteAuthenticatorView Action="@Action" />
 
 @code{
     [Parameter] public string? Action { get; set; }
+    /*
+    private async Task OnLoginSuccessAsync()
+    {
+        // Get the MSAL instance and user's account object
+        // ...
+
+        string accessToken = await JSRuntime.InvokeAsync<string>("getAccessToken", msalInstance, account);
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            await JSRuntime.InvokeVoidAsync("storeUserInIndexedDB", account, accessToken);
+        }
+    }
+    */
 }
