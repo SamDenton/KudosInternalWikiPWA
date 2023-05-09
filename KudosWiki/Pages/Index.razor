@@ -36,6 +36,11 @@
     public AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
     private string Logo = "Kudos_logo.png";
 
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("index.razor initialised");
+    }
+
     protected override async void OnAfterRender(bool firstRender)
     {
         if (firstRender)
