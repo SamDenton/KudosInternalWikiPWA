@@ -20,11 +20,11 @@ Current To-Do-List:
 
 -Add an icon for installed app, tab on browser etc.  Might be able to change the display name too?
 
--(In progress) Really need to start adding some error checking/suppression.  one example is 2 people saving at same time.  Would be nice to give alerts to the user as toast notifications but pain 
+-(Testing for more unhandled errors atm) Really need to start adding some error checking/suppression.
 
 -(Currently happy with the theme, but could add a second theme for accesability) - Need to give everything the same theme.  Either make text white and grey, or kudosText a light blue. If im feeling ambitious  i could add a theme selector for dark, light and kudos 
 
--(This is working, but in some situations it makes more api calls than I expect) Could have a function that checks api for changes before put? would refresh page to update but somehow keep users current changes??? 
+-(This is working, but in some situations it makes more api calls than I expect) Could have a function that checks api for changes before put?
 
 -Add an update button for app (https://whuysentruit.medium.com/blazor-wasm-pwa-adding-a-new-update-available-notification-d9f65c4ad13) 
 
@@ -37,6 +37,16 @@ Current To-Do-List:
 -Clean up console logs
 
 -Should move all SHA matching logic to PUT method, not repeat it in save(), edit() timer() etc.  Can add a return/callback for different cases
+
+-Would be nice to have offline auth token cashing for offline useage
+
+-Would be nice to cash the database when the program is closed for offline usage.  Will also allow me to store sha values and only GET changes
+
+-NavBar can be slow/laggy on pages with a lot of content
+
+-Search function can be slow
+
+-Delete button currently possitioned above text
 
 
 Fixed/Change log: 
