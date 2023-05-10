@@ -33,6 +33,7 @@ body {
     justify-content: space-between;
     height: calc(100vh - 75px);
 }
+
 #conversation {
     width: 100%;
     height: 80%;
@@ -42,6 +43,53 @@ body {
     padding: 5px;
 }
 
+.message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 10px;
+}
+
+    .message-container.assistant {
+        align-items: flex-end;
+    }
+
+    .message-container.user .name {
+        font-size: 0.8em;
+        color: #555;
+        margin-bottom: 5px;
+        margin-top: 2px;
+        /*background-color: #0d385b;
+        border-radius: 20px;
+        height: auto;*/
+    }
+
+    .message-container.assistant .name {
+        font-size: 0.8em;
+        color: #555;
+        margin-bottom: 5px;
+        margin-top: 2px;
+        /*background-color: #0d385b;
+        border-radius: 20px;
+        height: auto;*/
+    }
+
+.text-bubble {
+    background-color: #1c5380;
+    padding: 8px;
+    border-radius: 10px 10px 10px 0;
+    color: white;
+    max-width: 80%;
+    word-wrap: break-word;
+    margin: 0 0 0 50px;
+}
+
+.message-container.assistant .text-bubble {
+    background-color: #0d385b;
+    border-radius: 10px 10px 0 10px;
+    margin: 0 50px 0 0;
+}
+/*
     #conversation > p:nth-of-type(even) {
         text-align: right;
         background-color: #1c5380;
@@ -53,7 +101,7 @@ body {
         background-color: #0d385b;
         border-radius: 5px;
     }
-
+    */
 .info {
     color: rgba( 255, 255, 255, 0.5);
     font-size: 11px;
