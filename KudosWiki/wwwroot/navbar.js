@@ -147,6 +147,7 @@ function onMouseMove(event) {
 }
 
 function animateMouseMove(event) {
+    if (isTouchActive) { return };
     if (isMouseOverNav) {
         window.requestAnimationFrame(() => onMouseMove(event));
     } else {
@@ -164,6 +165,7 @@ function updatePosition(targetTop) {
 }
 
 function applyMomentum(targetTop, momentum) {
+    if (isTouchActive) { return };
     if (Math.abs(momentum) < 0.001) {
         return targetTop;
     }
@@ -218,14 +220,13 @@ function onTouchMove(event) {
         event.preventDefault(); // Prevent scrolling in the background
     }
 
-    const speedMultiplier = 2; // Adjust this value to control the scrolling speed
+    const speedMultiplier = 10; // Adjust this value to control the scrolling speed
     const newTop = currentTop + deltaY * speedMultiplier;
     updatePosition(newTop);
 }
 
 function onTouchEnd(event) {
     isTouchActive = false;
-    onMouseLeave();
 }
 
 
