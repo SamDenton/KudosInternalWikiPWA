@@ -45,6 +45,28 @@
     });
 }
 
+function initNavbarMobile() {
+    var navbar = document.querySelector('.sidebarController');
+    var links = document.querySelectorAll('.lastLink');
+    var icon = document.querySelector('.icon');
+    links.forEach(function (link) {
+        // Listen for clicks on the link
+        link.addEventListener('click', function () {
+            if (navbar.classList.contains('navShower') && window.innerWidth < 690) {
+                navbar.classList.remove('navShower');
+                navbar.classList.add('navHider');
+                icon.classList.remove('rotateLeft');
+                icon.classList.add('rotateRight');
+            } else {
+                navbar.classList.remove('navHider');
+                navbar.classList.add('navShower');
+                icon.classList.remove('rotateRight');
+                icon.classList.add('rotateLeft');
+            }
+        });
+    });
+}
+
 function fadeOut() {
     var elements = document.querySelectorAll('.fade-in');
     for (var i = 0; i < elements.length; i++) {
