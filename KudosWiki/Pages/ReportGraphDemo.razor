@@ -1,0 +1,124 @@
+﻿@page "/ReportDemo"
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@using System.Net.Http.Json
+
+<h3>ReportGraphDemo</h3>
+<label class="form-label bg-dark text-light" for="sectionDropdown">Select Section:</label>
+<select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @onchange="pickGraphAsync">
+    <option value="Default" disabled selected>Select a type, then section</option>
+    <option value="bar">Bar Chart</option>
+    <option value="line">Line Chart</option>
+    <option value="doughnut">Doughnut Chart</option>
+    <option value="radar">Radial Chart</option>
+    <option value="pie">Pie Chart</option>
+    <option value="polarArea">Polar Area Chart</option>
+
+</select>
+<canvas id="chartContainer"></canvas>
+
+
+
+
+<AuthorizeView>
+    <Authorized>
+
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private string barChart =   "{\"type\":\"bar\",\"labels\":[\"Red\",\"Blue\",\"Yellow\",\"Green\",\"Purple\",\"Orange\"],\"datasets\":[{\"label\":\"# of Votes\",\"data\":[12,19,3,5,2,3],\"borderWidth\":1}],\"options\":{\"scales\":{\"y\":{\"beginAtZero\":true}}}}";
+    private string lineChart = "{\"type\":\"line\",\"labels\":[\"January\",\"February\",\"March\",\"April\",\"May\",\"June\"],\"datasets\":[{\"label\":\"My First Dataset\",\"data\":[65,59,80,81,56,55,40],\"borderColor\":\"rgb(75, 192, 192)\",\"fill\":false}],\"options\":{\"scales\":{\"y\":{\"beginAtZero\":true}}}}";
+    private string doughnutChart = "{\"type\":\"doughnut\",\"labels\":[\"Red\",\"Blue\",\"Yellow\",\"Green\",\"Purple\",\"Orange\"],\"datasets\":[{\"label\":\"# of Votes\",\"data\":[12,19,3,5,2,3],\"backgroundColor\":[\"rgb(255, 99, 132)\",\"rgb(54, 162, 235)\",\"rgb(255, 205, 86)\",\"rgb(75, 192, 192)\",\"rgb(201, 203, 207)\",\"rgb(153, 102, 255)\"]}],\"options\":{}}";
+    private string radarChart = "{\"type\":\"radar\",\"labels\":[\"Eating\",\"Drinking\",\"Sleeping\",\"Designing\",\"Coding\",\"Cycling\",\"Running\"],\"datasets\":[{\"label\":\"My First Dataset\",\"data\":[65,59,90,81,56,55,40],\"fill\":true,\"backgroundColor\":\"rgba(255, 99, 132, 0.2)\",\"borderColor\":\"rgb(255, 99, 132)\",\"pointBackgroundColor\":\"rgb(255, 99, 132)\"},{\"label\":\"My Second Dataset\",\"data\":[28,48,40,19,96,27,100],\"fill\":true,\"backgroundColor\":\"rgba(54, 162, 235, 0.2)\",\"borderColor\":\"rgb(54, 162, 235)\",\"pointBackgroundColor\":\"rgb(54, 162, 235)\"}],\"options\":{\"elements\":{\"line\":{\"tension\":0.5}}}}";
+    private string pieChart = "{\"type\":\"pie\",\"labels\":[\"Red\",\"Blue\",\"Yellow\"],\"datasets\":[{\"label\":\"My First Dataset\",\"data\":[300,50,100],\"backgroundColor\":[\"rgb(255, 99, 132)\",\"rgb(54, 162, 235)\",\"rgb(255, 205, 86)\"]}],\"options\":{}}";
+    private string polarAreaChart = "{\"type\":\"polarArea\",\"labels\":[\"Red\",\"Green\",\"Yellow\",\"Grey\",\"Blue\"],\"datasets\":[{\"label\":\"My First Dataset\",\"data\":[11,16,7,3,14],\"backgroundColor\":[\"rgb(255,99,132)\",\"rgb(75,192,192)\",\"rgb(255,205,86)\",\"rgb(201,203,207)\",\"rgb(54,162,235)\"]}],\"options\":{}}";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("OnInitializedAsync ran");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("OnAfterRenderAsync ran");
+        if (firstRender)
+        {
+            await RenderGraphAsync("bar");
+        }
+    }
+
+    private async Task pickGraphAsync(ChangeEventArgs e)
+    {
+        string selectedChart = e.Value.ToString();
+        var type = lineChart;
+        // Invoke JavaScript to render the graph
+        if (selectedChart == "bar")
+        {
+            type = "bar";
+        }
+        else if (selectedChart == "line")
+        {
+            type = "line";
+        }
+        else if (selectedChart == "doughnut")
+        {
+            type = "doughnut";
+        }
+        else if (selectedChart == "radar")
+        {
+            type = "radar";
+        }
+        else if (selectedChart == "pie")
+        {
+            type = "pie";
+        }
+        else if (selectedChart == "polarArea")
+        {
+            type = "polarArea";
+        }
+        await RenderGraphAsync(type);
+    }
+
+    private async Task RenderGraphAsync(string chartType)
+    {
+        
+        Console.WriteLine(chartType);
+        try
+        {
+            var jsonData = lineChart;
+            // Invoke JavaScript to render the graph
+            if (chartType == "bar")
+            {
+                jsonData = barChart;
+            }
+            else if (chartType == "line")
+            {
+                jsonData = lineChart;
+            }
+            else if (chartType == "doughnut")
+            {
+                jsonData = doughnutChart;
+            }
+            else if (chartType == "radar")
+            {
+                jsonData = radarChart;
+            }
+            else if (chartType == "pie")
+            {
+                jsonData = pieChart;
+            }
+            else if (chartType == "polarArea")
+            {
+                jsonData = polarAreaChart;
+            }
+            await JSRuntime.InvokeVoidAsync("renderGraph", jsonData);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        StateHasChanged();
+    }
+}

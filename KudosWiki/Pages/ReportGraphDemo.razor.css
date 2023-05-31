@@ -1,0 +1,10 @@
+﻿body {
+
+}
+
+#chartContainer {
+    height: calc(90vh - 156px)!important;
+    z-index: 999;
+    opacity: 1 !important;
+    border: 5px solid #0d385b !important;
+}
