@@ -64,11 +64,7 @@
                     @* Show a loading message before API call is complete *@
                     @* Might add a timer so it displays a different message if the request takes too long *@
                     @* Should also add failure case if the API call returns 404 *@
-                    @if (contentHolderList == null || isContentLoaded == false)
-                    {
-                        <p><em>@loadingMSG</em></p>
-                    }
-                    else if (type == null)
+                    @if (contentHolderList == null || isContentLoaded == false || type == null) 
                     {
                         <div class="container-fluid bg-dark text-light">
                             <div class="row">
@@ -77,6 +73,12 @@
                                     <h1 class="mt-3">Welcome to the Internal Wiki</h1>
                                 </div>
                             </div>
+                            @if (contentHolderList == null)
+                            {
+                                <div class="loader">
+                                    <div class="loaderBar"></div>
+                                </div>
+                            }
                             <div class="row">
                                 <div class="col-12 text-center">
                                     <p>This is the internal wiki for our company. It contains a wealth of information, resources, and documentation that will help you understand and use our products and services.</p>

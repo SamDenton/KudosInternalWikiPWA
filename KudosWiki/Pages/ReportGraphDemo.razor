@@ -3,20 +3,53 @@
 @inject IJSRuntime JSRuntime
 @using System.Net.Http.Json
 
-<h3>ReportGraphDemo</h3>
-<label class="form-label bg-dark text-light" for="sectionDropdown">Select Section:</label>
-<select class="form-control form-control-dark bg-dark text-primary border-primary" id="sectionDropdown" @onchange="pickGraphAsync">
-    <option value="Default" disabled selected>Select a type, then section</option>
+<h3>AI Reporting Demo</h3>
+<p>Currently, the Generate button calls an AI to generate random data, but specifically in the format its requested in.  Once I have the tools setup, I will be able to upload data for the AI the analyze, parse to specific formats, pull insights, trends etc.  It will show an example graph to help pick the format, then replace the example when you click Generate</p>
+<label class="form-label bg-dark text-light typeLabel" for="sectionDropdown">Graph type:</label>
+<select class="form-control form-control-dark bg-dark text-primary border-primary typeDropdown" @onchange="pickGraphAsync" disabled="@loading">
+    <option value="Default" disabled selected>Graph Type</option>
     <option value="bar">Bar Chart</option>
     <option value="line">Line Chart</option>
     <option value="doughnut">Doughnut Chart</option>
     <option value="radar">Radial Chart</option>
     <option value="pie">Pie Chart</option>
     <option value="polarArea">Polar Area Chart</option>
-
 </select>
-<canvas id="chartContainer"></canvas>
 
+<label class="form-label bg-dark text-light dataLabel" for="sectionDropdown">Data type:</label>
+<select class="form-control form-control-dark bg-dark text-primary border-primary dataDropdown" @onchange="pickDataAsync" disabled="@loading">
+    // @*@onchange="pickGraphAsync" *@
+    <option value="Default" disabled selected>Data Type</option>
+    <option value="sales">Sales</option>
+    <option value="giftAid">Gift Aid</option>
+    <option value="stock">Stock</option>
+</select>
+<label class="form-label bg-dark text-light periodLabel periodDropdown" for="sectionDropdown">Period Covered:</label>
+<select class="form-control form-control-dark bg-dark text-primary border-primary" @onchange="pickPeriodAsync" disabled="@loading">
+    <option value="Default" disabled selected>Period Length</option>
+    <option value="day">1 Day</option>
+    <option value="week">1 Week</option>
+    <option value="month">1 Month</option>
+</select>
+<label class="form-label bg-dark text-light groupLabel groupDropdown" for="sectionDropdown">Group By:</label>
+<select class="form-control form-control-dark bg-dark text-primary border-primary" @onchange="pickGroupAsync" disabled="@loading">
+    <option value="Default" disabled selected>Group By</option>
+    <option value="categories">Categories</option>
+    <option value="branches">Branch</option>
+    <option value="types">Stock Type</option>
+</select>
+<button class="btn btn-outline-primary" @onclick="(() => GetGraphData())" disabled="@loading">Generate Example Data!</button>
+<div class="loaderContiner">
+    @if (loading)
+    {
+        <div class="loader">
+            <div class="loaderBar"></div>
+        </div>
+    }
+</div>
+<div id="chartContainer">
+    <canvas id="chartCanvas"></canvas>
+</div>
 
 
 
@@ -27,17 +60,47 @@
 </AuthorizeView>
 
 @code {
+    private string API_KEY;
+    private bool loading = false;
     private string barChart =   "{\"type\":\"bar\",\"labels\":[\"Red\",\"Blue\",\"Yellow\",\"Green\",\"Purple\",\"Orange\"],\"datasets\":[{\"label\":\"# of Votes\",\"data\":[12,19,3,5,2,3],\"borderWidth\":1}],\"options\":{\"scales\":{\"y\":{\"beginAtZero\":true}}}}";
-    private string lineChart = "{\"type\":\"line\",\"labels\":[\"January\",\"February\",\"March\",\"April\",\"May\",\"June\"],\"datasets\":[{\"label\":\"My First Dataset\",\"data\":[65,59,80,81,56,55,40],\"borderColor\":\"rgb(75, 192, 192)\",\"fill\":false}],\"options\":{\"scales\":{\"y\":{\"beginAtZero\":true}}}}";
+    private string lineChart = "{\"type\":\"line\",\"labels\":[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"10\",\"11\",\"12\",\"13\",\"14\",\"15\",\"16\",\"17\",\"18\",\"19\",\"20\",\"21\",\"22\",\"23\",\"24\",\"25\",\"26\",\"27\",\"28\",\"29\",\"30\"],\"datasets\":[{\"label\":\"Electronics\",\"data\":[12,19,3,5,2,3,7,8,9,10,11,15,18,14,17,12,14,16,17,13,19,14,16,12,11,14,16,18,19,20],\"borderColor\":\"rgb(255,99,132)\",\"fill\":false},{\"label\":\"Groceries\",\"data\":[22,24,23,20,25,27,23,22,26,24,23,21,22,24,26,28,30,25,23,24,25,26,28,30,31,29,28,27,26,25],\"borderColor\":\"rgb(75,192,192)\",\"fill\":false},{\"label\":\"Clothing\",\"data\":[35,36,38,39,40,42,43,44,45,46,47,48,49,50,51,52,54,55,57,59,58,57,56,55,56,57,58,59,60,61],\"borderColor\":\"rgb(255,205,86)\",\"fill\":false}],\"options\":{\"scales\":{\"y\":{\"beginAtZero\":true}}}}";
     private string doughnutChart = "{\"type\":\"doughnut\",\"labels\":[\"Red\",\"Blue\",\"Yellow\",\"Green\",\"Purple\",\"Orange\"],\"datasets\":[{\"label\":\"# of Votes\",\"data\":[12,19,3,5,2,3],\"backgroundColor\":[\"rgb(255, 99, 132)\",\"rgb(54, 162, 235)\",\"rgb(255, 205, 86)\",\"rgb(75, 192, 192)\",\"rgb(201, 203, 207)\",\"rgb(153, 102, 255)\"]}],\"options\":{}}";
     private string radarChart = "{\"type\":\"radar\",\"labels\":[\"Eating\",\"Drinking\",\"Sleeping\",\"Designing\",\"Coding\",\"Cycling\",\"Running\"],\"datasets\":[{\"label\":\"My First Dataset\",\"data\":[65,59,90,81,56,55,40],\"fill\":true,\"backgroundColor\":\"rgba(255, 99, 132, 0.2)\",\"borderColor\":\"rgb(255, 99, 132)\",\"pointBackgroundColor\":\"rgb(255, 99, 132)\"},{\"label\":\"My Second Dataset\",\"data\":[28,48,40,19,96,27,100],\"fill\":true,\"backgroundColor\":\"rgba(54, 162, 235, 0.2)\",\"borderColor\":\"rgb(54, 162, 235)\",\"pointBackgroundColor\":\"rgb(54, 162, 235)\"}],\"options\":{\"elements\":{\"line\":{\"tension\":0.5}}}}";
     private string pieChart = "{\"type\":\"pie\",\"labels\":[\"Red\",\"Blue\",\"Yellow\"],\"datasets\":[{\"label\":\"My First Dataset\",\"data\":[300,50,100],\"backgroundColor\":[\"rgb(255, 99, 132)\",\"rgb(54, 162, 235)\",\"rgb(255, 205, 86)\"]}],\"options\":{}}";
     private string polarAreaChart = "{\"type\":\"polarArea\",\"labels\":[\"Red\",\"Green\",\"Yellow\",\"Grey\",\"Blue\"],\"datasets\":[{\"label\":\"My First Dataset\",\"data\":[11,16,7,3,14],\"backgroundColor\":[\"rgb(255,99,132)\",\"rgb(75,192,192)\",\"rgb(255,205,86)\",\"rgb(201,203,207)\",\"rgb(54,162,235)\"]}],\"options\":{}}";
+    private string? type { get; set; } = "bar";
+    private string? data { get; set; } = "sales";
+    private string? period { get; set; } = "month";
+    private string? group { get; set; } = "categories";
 
+    //Not in use currently but useful to visualise the structure of the JSON.  For a Pie Chart for example, the options are formatted differently
+    private string JSONStringType = "{\"type\":\"bar\",";
+    private string JSONLabels = "\"labels\":[\"Red\",\"Blue\",\"Yellow\",\"Green\",\"Purple\",\"Orange\"],";
+    private string JSONDatasets = "\"datasets\":[{\"label\":\"# of Votes\",\"data\":[12,19,3,5,2,3],\"borderWidth\":1}],";
+    private string JSONOptions = "\"options\":{\"scales\":{\"y\":{\"beginAtZero\":true}}}}";
+
+
+    private string systemMessageChat = "You are a bot that functions as a back end data compiler, converting user uploaded data into JSON strings that can be read by chart.js and rendered.  The only responses allowed are JSON strings, surrounded by 2 sets of double quotes.  The JSON string should match this format exactly, with only changes to the graph type, data points and labels: \"\"{\"type\":\"bar\",\"labels\":[\"Red\",\"Blue\",\"Yellow\",\"Green\",\"Purple\",\"Orange\"],\"datasets\":[{\"label\":\"# of Votes\",\"data\":[12,19,3,5,2,3],\"borderWidth\":1}],\"options\":{\"scales\":{\"y\":{\"beginAtZero\":true}}}}\"\"  The request will be sent in the form of a graph type, a data set and an instruction on which data is relevant to the query.  You will convert this request into the JSON string, with no other output";
+
+    private string systemMessageChatTemp = "You are a bot that functions as a back end data compiler, creating random test data in the form of JSON strings that can be read by chart.js and rendered.  The only responses allowed are JSON strings.  The JSON string should match this format exactly, with only changes to the graph type, data points and labels: {\"type\":\"bar\",\"labels\":[\"Red\",\"Blue\",\"Yellow\",\"Green\",\"Purple\",\"Orange\"],\"datasets\":[{\"label\":\"# of Votes\",\"data\":[12,19,3,5,2,3],\"borderWidth\":1}],\"options\":{\"scales\":{\"y\":{\"beginAtZero\":true}}}}  The request will be sent in the form of a graph type and an instruction on what type of data to simulate.  You will convert this request into the JSON string, with no other output.  If the expected response in unclear, output the example given";
+
+    private string exampleMessageChatRequest = "I want a line graph, showing sales data for a shop, over a 1 month period, broken down into item categories";
+    private string exampleMessageChatResponce = "{\"type\":\"line\",\"labels\":[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"10\",\"11\",\"12\",\"13\",\"14\",\"15\",\"16\",\"17\",\"18\",\"19\",\"20\",\"21\",\"22\",\"23\",\"24\",\"25\",\"26\",\"27\",\"28\",\"29\",\"30\"],\"datasets\":[{\"label\":\"Electronics\",\"data\":[12,19,3,5,2,3,7,8,9,10,11,15,18,14,17,12,14,16,17,13,19,14,16,12,11,14,16,18,19,20],\"borderColor\":\"rgb(255,99,132)\",\"fill\":false},{\"label\":\"Groceries\",\"data\":[22,24,23,20,25,27,23,22,26,24,23,21,22,24,26,28,30,25,23,24,25,26,28,30,31,29,28,27,26,25],\"borderColor\":\"rgb(75,192,192)\",\"fill\":false},{\"label\":\"Clothing\",\"data\":[35,36,38,39,40,42,43,44,45,46,47,48,49,50,51,52,54,55,57,59,58,57,56,55,56,57,58,59,60,61],\"borderColor\":\"rgb(255,205,86)\",\"fill\":false}],\"options\":{\"scales\":{\"y\":{\"beginAtZero\":true}}}}";
+
+    private string GraphRequestAndData;
+
+    private string exampleRequest = "";
+    private string exampleReply = "";
+    private List<Message> currentConversation = new List<Message>();
 
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("OnInitializedAsync ran");
+        currentConversation.Add(new Message { role = "system", content = systemMessageChatTemp });
+        currentConversation.Add(new Message { role = "system", content = exampleMessageChatRequest });
+        currentConversation.Add(new Message { role = "system", content = exampleMessageChatResponce });
+        var getFromTokens = await Http.GetAsync("ChatToken.txt");
+        API_KEY = await getFromTokens.Content.ReadAsStringAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -45,71 +108,65 @@
         Console.WriteLine("OnAfterRenderAsync ran");
         if (firstRender)
         {
-            await RenderGraphAsync("bar");
+            await RenderGraphAsync();
         }
     }
 
     private async Task pickGraphAsync(ChangeEventArgs e)
     {
         string selectedChart = e.Value.ToString();
-        var type = lineChart;
-        // Invoke JavaScript to render the graph
-        if (selectedChart == "bar")
-        {
-            type = "bar";
-        }
-        else if (selectedChart == "line")
-        {
-            type = "line";
-        }
-        else if (selectedChart == "doughnut")
-        {
-            type = "doughnut";
-        }
-        else if (selectedChart == "radar")
-        {
-            type = "radar";
-        }
-        else if (selectedChart == "pie")
-        {
-            type = "pie";
-        }
-        else if (selectedChart == "polarArea")
-        {
-            type = "polarArea";
-        }
-        await RenderGraphAsync(type);
+        type = selectedChart;       
+        await RenderGraphAsync();
     }
 
-    private async Task RenderGraphAsync(string chartType)
+    private async Task pickDataAsync(ChangeEventArgs e)
     {
-        
-        Console.WriteLine(chartType);
+        string selectedChart = e.Value.ToString();
+        data = selectedChart;
+        await RenderGraphAsync();
+    }
+
+    private async Task pickPeriodAsync(ChangeEventArgs e)
+    {
+        string selectedChart = e.Value.ToString();
+        period = selectedChart;       
+        await RenderGraphAsync();
+    }
+
+    private async Task pickGroupAsync(ChangeEventArgs e)
+    {
+        string selectedChart = e.Value.ToString();
+        group = selectedChart;
+        await RenderGraphAsync();
+    }
+
+    private async Task RenderGraphAsync()
+    {
         try
         {
             var jsonData = lineChart;
             // Invoke JavaScript to render the graph
-            if (chartType == "bar")
+            if (type == "bar")
             {
                 jsonData = barChart;
             }
-            else if (chartType == "line")
+            else if (type == "line")
             {
                 jsonData = lineChart;
             }
-            else if (chartType == "doughnut")
+            else if (type == "doughnut")
             {
                 jsonData = doughnutChart;
             }
-            else if (chartType == "radar")
+            else if (type == "radar")
             {
                 jsonData = radarChart;
             }
-            else if (chartType == "pie")
+            else if (type == "pie")
             {
                 jsonData = pieChart;
             }
-            else if (chartType == "polarArea")
+            else if (type == "polarArea")
             {
                 jsonData = polarAreaChart;
             }
@@ -121,4 +178,69 @@
         }
         StateHasChanged();
     }
+
+
+    private async Task GetGraphData()
+    {
+        Console.WriteLine("called GetGraphData");
+        if (loading)
+        {
+            return;
+        }
+        try
+        {
+            GraphRequestAndData = "I want a " +  type + " graph, showing " + data + " data for a shop, over a 1 " + period + " period, broken down into " + group + "";
+            loading = true;
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", API_KEY);
+            Console.WriteLine(GraphRequestAndData);
+            currentConversation.Add(new Message { role = "user", content = GraphRequestAndData });
+            var requestBody = new
+            {
+                model = "gpt-3.5-turbo",
+                messages = currentConversation.ToArray(),
+                max_tokens = 1000
+            };
+
+            StateHasChanged();
+            request.Content = JsonContent.Create(requestBody);
+            request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+            var response = await Http.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var dataOut = await response.Content.ReadFromJsonAsync<OpenAIResponse>();
+            var outputText = dataOut.choices[0].message.content;
+            Console.WriteLine(outputText);
+            var jsonData = outputText;
+
+            await JSRuntime.InvokeVoidAsync("renderGraph", jsonData);
+
+            loading = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            currentConversation.Add(new Message { role = "error", content = "OpenAI API unavailable or out of credits" });
+            Console.WriteLine("OpenAI API unavailable or out of credits");
+        }
+    }
+
+    public class OpenAIResponse
+    {
+        public Choice[] choices { get; set; }
+    }
+
+    public class Choice
+    {
+        public Message message { get; set; }
+    }
+
+    public class Message
+    {
+        public string role { get; set; }
+        public string content { get; set; }
+    }
+
 }

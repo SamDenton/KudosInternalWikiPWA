@@ -1,7 +1,7 @@
 var myChart;
 
 window.renderGraph = function (jsonData) {
-    var canvas = document.getElementById('chartContainer');
+    var canvas = document.getElementById('chartCanvas');
 
     var data = JSON.parse(jsonData);
 
